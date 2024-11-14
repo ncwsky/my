@@ -8,5 +8,5 @@ define('COMMON', __DIR__.'/common');
 require __DIR__ . '/vendor/myphps/my-php-srv/Load.php';
 require __DIR__ . '/vendor/workerman/workerman/Autoloader.php';
 \Workerman\Protocols\Http\Session::$autoUpdateTimestamp = true;
-$srv = new WorkerManHttpSrv(require(is_file(__DIR__ . '/wokerman.conf.local.php') ? __DIR__ . '/wokerman.conf.local.php' : __DIR__ . '/wokerman.conf.php'));
+$srv = new WorkerManHttpSrv(require(__DIR__ . '/wokerman.conf.php'));
 $srv->run($argv);

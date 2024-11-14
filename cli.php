@@ -23,6 +23,7 @@ if (!IS_CLI) {
 echo implode(" ", $_SERVER['argv']).PHP_EOL;
 $a = 'cli'.ucfirst($_SERVER['argv'][1]);
 $params = array_slice($_SERVER['argv'], 2);
+cliRun($a, $params);
 
 //脚本命令处理
 function cliRun($a, $params){
@@ -41,10 +42,8 @@ function cliRun($a, $params){
     } catch (\Throwable $e) {
         echo $e->getMessage();
     }
+    echo PHP_EOL;
 }
-
-cliRun($a, $params);
-echo PHP_EOL;
 
 /**
  * 生成表model类
@@ -70,4 +69,60 @@ function cliModel($table='1', $namespace='common\model', $baseName='\myphp\Model
         }
     }
     echo 'done'.PHP_EOL;
+}
+
+/**
+ * 简单的应用异步处理
+ * php cli.php Queue
+ * @param int $size
+ */
+function cliQueue($size=100){
+    $run = (int)redis()->get('__queue_run');
+    if ($run >= 10) {
+        echo '最多允许10个处理进程', PHP_EOL;
+        return;
+    }
+    redis()->incr('__queue_run'); //记录运行进程数
+
+    $n = 0;
+    try {
+        $time = time();
+        //延迟入列
+        $items = redis()->zrevrangebyscore('__queueZ', $time, '-inf');
+        if ($items) {
+            echo '延迟处理数:' . count($items), PHP_EOL;
+            foreach ($items as $cmd) {
+                redis()->rpush('__queue', $cmd); //将值推入到尾部
+            }
+            redis()->zremrangebyscore('__queueZ', '-inf', $time); //清除已处理的数据
+        }
+        //处理队列
+        while ($data = redis()->lpop('__queue')) {
+            $n++;
+            list($func, $params) = json_decode($data, true);
+            $start_time = microtime(true);
+            echo date("Y/m/d H:i:s").' start: ' . $data, PHP_EOL;
+            if (function_exists($func)) {
+                cliRun($func, $params);
+            } else {
+                if (is_array($params)) {
+                    $params = http_build_query($params, "", "&", PHP_QUERY_RFC3986);
+                }
+                $params = (strpos($func, '?') ? '&' : '?') . $params;
+                $cmd = strpos($params, '&') ? '"' . $func . $params . '"' : $func . $params;
+                $cmd = 'php my ' . $cmd;
+                $ret = shell_exec($cmd);
+                echo $cmd . ' : ', $ret, PHP_EOL;
+            }
+            echo date("Y/m/d H:i:s").' end: '.run_time($start_time), PHP_EOL;
+
+            if ($n > $size) break; //限制条数 防止有数据时进程一直处理
+        }
+    } catch (\Exception $e) {
+        //todo alarm
+        toLog(sprintf('line:%s, file:%s, err:%s, trace:%s', $e->getLine(), $e->getFile(), $e->getMessage(), $e->getTraceAsString()), 'queue');
+    }
+    redis()->decr('__queue_run');
+
+    echo 'queue ok['.$n.']',PHP_EOL;
 }

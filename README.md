@@ -1,3 +1,5 @@
+**创建项目**    
+> composer create-project myphps/my     
 
 **composer**  
 ```

@@ -1,0 +1,15 @@
+{
+	"name": "myphps/my",
+	"description": "myphp框架",
+	"license": "MIT",
+	"keywords": ["myphp"],
+	"homepage": "https://github.com/ncwsky/myphp",
+    "minimum-stability": "dev",
+	"require": {
+        "myphps/my-php-srv": "^3.0",
+        "endroid/qr-code": "4.3.5",
+        "firebase/php-jwt": "^6.4",
+        "box/spout": "^3.3",
+        "myphps/phpexcel": "^1.8"
+    }
+}

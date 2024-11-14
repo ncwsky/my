@@ -1,8 +1,4 @@
 <?php
-
-use EasyWeChat\Factory;
-use myphp\cache\File;
-
 /**
  * @param string $name
  * @return lib_redis
@@ -13,7 +9,7 @@ function redis($name = 'redis')
 }
 
 /**
- * @return File
+ * @return \myphp\cache\File
  * @throws Exception
  */
 function getCache()
@@ -21,11 +17,20 @@ function getCache()
     //return \myphp\Cache::getInstance('file', GetC('cache_option'));
     static $cache;
     if (!$cache) {
-        $cache = new File();
+        $cache = new \myphp\cache\File();
         $cache->setCacheDir(RUNTIME . '/cache');
         $cache->setCachePrefix('_');
     }
     return $cache;
+}
+
+//循环日期记录
+function cLog($name='clog'){
+    static $log;
+    if (!isset($log[$name])) {
+        $log[$name] = new RotateLog(RUNTIME . '/' . $name . '.log'); //, RotateLog::MODE_FIXED, 0.5*1024*1024
+    }
+    return $log[$name];
 }
 
 /**
@@ -399,7 +404,7 @@ function miniQrCode($path, $scene, $val='', $qrFile='', $cfgName='wx_mini'){
         redis()->setex('qr:' . $scene, 600, $val);
     }
 
-    $app = Factory::miniProgram(GetC($cfgName));
+    $app = \EasyWeChat\Factory::miniProgram(GetC($cfgName));
     $env_version = $_GET['env_ver']??''; //指定版本  release, trial, develop
     $options = [
         'page'  => $path,
@@ -553,16 +558,4 @@ function costTime($start=0){
     } else {
         return number_format(microtime(true) - $time, 4);
     }
-}
-
-/**
- * 获取请求来源
- * @param $userAgent
- * @return string
- */
-function getFrom($userAgent){
-    if (strpos($userAgent, 'MicroMessenger/')) {
-        return '小程序';
-    }
-    return 'PC';
 }

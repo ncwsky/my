@@ -482,29 +482,37 @@ function outMsg($msg, $url='', $info='', $time = 1) {
     exit($out_html);
 }
 
-function YxLanIp($check=false){
-    $ip = dns_get_record('wbtun.03kan.com', DNS_A)[0]['ip'] ?? '';
-    if (!$ip) {
-        $json = json_decode(file_get_contents('http://admin.guanliyuangong.com/login/ip'), true);
-        $ip = $json['data']['ip'] ?? '0.0.0.0';
+/**
+ * 解析域名获取ip
+ * @param $domain
+ * @return mixed|string
+ */
+function dns2ip($domain){
+    return dns_get_record($domain, DNS_A)[0]['ip'] ?? '';
+}
+
+/**
+ * 限定指定外网ip或是内网ip判定
+ * @param $domain
+ * @param string $lan
+ * @return bool
+ */
+function inLanIp($domain, $lan='192.168.0.'){
+    $ip = dns2ip($domain);
+    $remoteIp = '0.0.0.1';
+    //toLog($_SERVER, 'srv');
+    if (isset($_SERVER['HTTP_ALI_CDN_REAL_IP'])) { #阿里cdn
+        $remoteIp = $_SERVER['HTTP_ALI_CDN_REAL_IP'];
+    } elseif (isset($_SERVER['HTTP_X_TENCENT_UA']) && isset($_SERVER['HTTP_X_FORWARDED_FOR'])) { //腾讯
+        $remoteIp = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    } elseif (isset($_SERVER['HTTP_X_REAL_IP'])) {
+        $remoteIp = $_SERVER['HTTP_X_REAL_IP'];
+    } elseif (isset($_SERVER['REMOTE_ADDR'])) {
+        $remoteIp = $_SERVER['REMOTE_ADDR'];
     }
-    if ($check) {
-        $remoteIp = '0.0.0.1';
-        //toLog($_SERVER, 'srv');
-        if (isset($_SERVER['HTTP_ALI_CDN_REAL_IP'])) { #阿里cdn
-            $remoteIp = $_SERVER['HTTP_ALI_CDN_REAL_IP'];
-        } elseif (isset($_SERVER['HTTP_X_TENCENT_UA']) && isset($_SERVER['HTTP_X_FORWARDED_FOR'])) { //腾讯
-            $remoteIp = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        } elseif (isset($_SERVER['HTTP_X_REAL_IP'])) {
-            $remoteIp = $_SERVER['HTTP_X_REAL_IP'];
-        } elseif (isset($_SERVER['REMOTE_ADDR'])) {
-            $remoteIp = $_SERVER['REMOTE_ADDR'];
-        }
-        if (strpos($remoteIp, '192.168.0.') === 0) return true;
-        //toLog($ip.'---'.$remoteIp, 'ip');
-        return $ip == $remoteIp;
-    }
-    return $ip;
+    if (strpos($remoteIp, $lan) === 0) return true; //内网
+    //toLog($ip.'---'.$remoteIp, 'ip');
+    return $ip == $remoteIp;
 }
 
 /**

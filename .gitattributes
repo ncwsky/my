@@ -1,3 +1,2 @@
 # Ignore all tests, documentation and dot files for archive
 /.gitattributes                 export-ignore
-/launch/xrdjLaunch.exe          export-ignore

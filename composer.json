@@ -1,13 +1,12 @@
 {
-	"name": "myphps/my",
+    "name": "myphps/my",
     "type": "project",
-	"description": "myphp框架",
-	"license": "MIT",
-	"keywords": ["myphp"],
-	"homepage": "https://github.com/ncwsky/my",
+    "description": "myphp框架",
+    "license": "MIT",
+    "keywords": ["myphp"],
+    "homepage": "https://github.com/ncwsky/my",
     "minimum-stability": "dev",
-    "prefer-stable": true,
-	"require": {
+    "require": {
         "myphps/my-php-srv": "^3.0"
     }
 }

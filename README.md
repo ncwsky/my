@@ -1,5 +1,19 @@
 **创建项目**    
-> composer create-project myphps/my     
+> composer create-project myphps/my  
+
+**运行**  
+```
+创建应用  
+php my --run=应用目录名 --init 
+
+初始表Model  
+php cli.php Model 1 "common\model" "CommonModel"  
+
+常驻内存运行  
+php app.php  
+或  
+php app.php -n进程数 -p端口 [-s Swoole方式运行] 
+```
 
 **composer**  
 ```

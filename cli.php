@@ -72,6 +72,67 @@ function cliModel($table='1', $namespace='common\model', $baseName='\myphp\Model
 }
 
 /**
+ * 生成phar文件
+ * php cli.php phar
+ * php -d phar.readonly=0 cli.php phar   使用 -d 参数来临时修改 phar.readonly 设置
+ * @param int $sigName
+ * @param string $private_key_file
+ */
+function cliPhar($sigName='sha256', $private_key_file=''){
+    $pharFile = __DIR__ . '/my.phar';
+    if (file_exists($pharFile)) {
+        unlink($pharFile);
+    }
+
+    $sigTypeMap = ['md5' => Phar::MD5, 'sha1' => Phar::SHA1, 'sha256' => Phar::SHA256, 'sha512' => Phar::SHA512, 'openssl' => Phar::OPENSSL];
+    $sigType = $sigTypeMap[$sigName] ?? Phar::SHA256;
+
+    $exRegex = '#^(?!.*(\.log|\.pid|\.sh|\.gitignore|runLock|composer.lock|composer.json|/.github/|/.idea/|/.git/|/runtime/|/log/|/vendor-bin/|/build/))(.*)$#';
+    $phar = new Phar($pharFile, 0, 'my');
+    $phar->startBuffering();
+
+    if ($sigType === Phar::OPENSSL) {
+        if (!file_exists($private_key_file)) {
+            throw new RuntimeException("使用'Phar::OPENSSL'签名需要提供私钥文件");
+        }
+        $private = openssl_get_privatekey(file_get_contents($private_key_file));
+        $pkey = '';
+        openssl_pkey_export($private, $pkey);
+        $phar->setSignatureAlgorithm($sigType, $pkey);
+    } else {
+        $phar->setSignatureAlgorithm($sigType);
+    }
+
+    $phar->buildFromDirectory(__DIR__, $exRegex);
+
+    $exFiles = [
+        '.gitattributes',
+        'app.conf.php',
+        'app.conf.local.php',
+        'conf.php',
+        'conf.local.php'
+    ];
+    foreach ($exFiles as $file) {
+        if($phar->offsetExists($file)){
+            $phar->delete($file);
+        }
+    }
+
+    echo '开始生成Phar',PHP_EOL;
+    $phar->setStub("#!/usr/bin/env php
+<?php
+define('IN_PHAR', true);
+Phar::mapPhar('my');
+require 'phar://my/app.php';
+__HALT_COMPILER();
+");
+
+    $phar->stopBuffering();
+    unset($phar);
+    echo 'Phar生成完成',PHP_EOL;
+}
+
+/**
  * 简单的应用异步处理
  * php cli.php Queue
  * @param int $size

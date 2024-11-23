@@ -39,7 +39,8 @@ class IndexAct extends Base{
     public function root(){
         return ['root'=>ROOT];
     }
+
     public function env(){
-	    return \myphp::$env;
+        return toJson(\myphp::$env);
     }
 }

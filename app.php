@@ -55,17 +55,25 @@ function cpu_num()
 
 //Phar包路径处理
 if (class_exists(Phar::class, false) && Phar::running(false)) {
-    define('MY_PHAR_DIR', dirname(Phar::running(false)));
     define('MY_PHAR_RUNNING', Phar::running());
+    define('APP_RUN_DIR', dirname(Phar::running(false)));
+} else {
+    define('APP_RUN_DIR', __DIR__);
 }
 
-define('APP_RUN_DIR', defined('MY_PHAR_DIR') ? MY_PHAR_DIR : __DIR__);
 if (!is_dir(APP_RUN_DIR . '/log')) {
     mkdir(APP_RUN_DIR . '/log', 0755);
 }
 $config = require(APP_RUN_DIR . '/app.conf.php');
 if (is_file(APP_RUN_DIR . '/app.conf.local.php')) {
     $config = array_merge($config, require(APP_RUN_DIR . '/app.conf.local.php'));
+}
+//phar模式下路径处理
+if (defined('MY_PHAR_RUNNING')) {
+    //临时目录
+    define('RUNTIME', APP_RUN_DIR . '/runtime');
+    //站点目录
+    define('SITE_WEB', APP_RUN_DIR . '/web');
 }
 //onWorker
 $config['worker_load'] = [

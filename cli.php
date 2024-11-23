@@ -72,14 +72,17 @@ function cliModel($table='1', $namespace='common\model', $baseName='\myphp\Model
 }
 
 /**
- * 生成phar文件
+ * 生成phar文件 仅用于常驻内存模式下运行
  * php cli.php phar
  * php -d phar.readonly=0 cli.php phar   使用 -d 参数来临时修改 phar.readonly 设置
  * @param int $sigName
  * @param string $private_key_file
  */
 function cliPhar($sigName='sha256', $private_key_file=''){
-    $pharFile = __DIR__ . '/my.phar';
+    if (!is_dir(__DIR__ . '/dist')) {
+        mkdir(__DIR__ . '/dist', 0755);
+    }
+    $pharFile = __DIR__ . '/dist/my.phar';
     if (file_exists($pharFile)) {
         unlink($pharFile);
     }
@@ -87,7 +90,7 @@ function cliPhar($sigName='sha256', $private_key_file=''){
     $sigTypeMap = ['md5' => Phar::MD5, 'sha1' => Phar::SHA1, 'sha256' => Phar::SHA256, 'sha512' => Phar::SHA512, 'openssl' => Phar::OPENSSL];
     $sigType = $sigTypeMap[$sigName] ?? Phar::SHA256;
 
-    $exRegex = '#^(?!.*(\.log|\.pid|\.sh|\.gitignore|runLock|composer.lock|composer.json|/.github/|/.idea/|/.git/|/runtime/|/log/|/vendor-bin/|/build/))(.*)$#';
+    $exRegex = '#^(?!.*(\.log|\.pid|\.sh|\.gitignore|runLock|composer.lock|composer.json|/.github/|/.idea/|/.git/|/runtime/|/log/|/vendor/bin/|/build/|/dist/|/web/))(.*)$#';
     $phar = new Phar($pharFile, 0, 'my');
     $phar->startBuffering();
 
@@ -129,6 +132,20 @@ __HALT_COMPILER();
 
     $phar->stopBuffering();
     unset($phar);
+    //复制配置文件
+    copy(__DIR__ . '/app.conf.php', __DIR__ . '/dist/app.conf.php');
+    copy(__DIR__ . '/conf.php', __DIR__ . '/dist/conf.php');
+    //生成脚本执行文件
+    copy(__DIR__.'/my.bat', __DIR__.'/dist/my.bat');
+    file_put_contents(__DIR__.'/dist/my', "#!/usr/bin/env php
+<?php
+/**
+ * cli模式下脚本执行入口
+ * my --init 应用初始化
+ * my [--run=指定应用目录] [m/]c/a [\"b=1&d=1\"|b=1 d=1]
+ */
+require 'phar://my.phar/my';");
+
     echo 'Phar生成完成',PHP_EOL;
 }
 

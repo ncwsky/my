@@ -5,6 +5,7 @@
 /*.pid
 /runLock
 /log
+/dist
 /web/tmp
 /web/up
 *.log

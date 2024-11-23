@@ -23,4 +23,12 @@ class IndexAct extends Base{
 		return $this->fetch();
 */
 	}
+
+	public function time(){
+	    return time();
+    }
+
+    public function date(){
+	    return date("Y-m-d H:i:s");
+    }
 }

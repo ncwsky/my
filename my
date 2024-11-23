@@ -27,7 +27,7 @@ $_arg = getopt('', ['run:', 'init']);
 $init = isset($_arg['init']);
 if ($init) { //初始化
     if (defined('MY_PHAR_RUNNING')) {
-        die('Phar文档模式下不支持init!');
+        die('Phar文档模式下不支持此操作!');
     }
     $_SERVER['argv'] = [];
     echo 'Run Dir: ' . APP_RUN_DIR, PHP_EOL;

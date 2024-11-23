@@ -1,6 +1,14 @@
 <?php
+//Phar包路径处理
+if (class_exists(Phar::class, false) && Phar::running(false)) {
+    define('MY_PHAR_RUNNING', Phar::running());
+    define('APP_RUN_DIR', dirname(Phar::running(false)));
+} else {
+    define('APP_RUN_DIR', __DIR__);
+}
+
 require __DIR__ . "/vendor/autoload.php";
-require __DIR__ . "/conf.php";
+require APP_RUN_DIR . "/conf.php";
 require __DIR__ . "/vendor/myphps/myphp/base.php";
 
 /*
@@ -79,8 +87,8 @@ function cliModel($table='1', $namespace='common\model', $baseName='\myphp\Model
  * @param string $private_key_file
  */
 function cliPhar($sigName='sha256', $private_key_file=''){
-    if (!is_dir(__DIR__ . '/dist')) {
-        mkdir(__DIR__ . '/dist', 0755);
+    if (!is_dir(__DIR__ . '/dist/web')) {
+        mkdir(__DIR__ . '/dist/web', 0755, true);
     }
     $pharFile = __DIR__ . '/dist/my.phar';
     if (file_exists($pharFile)) {
@@ -110,6 +118,7 @@ function cliPhar($sigName='sha256', $private_key_file=''){
 
     $exFiles = [
         '.gitattributes',
+        'README.md',
         'app.conf.php',
         'app.conf.local.php',
         'conf.php',
@@ -120,8 +129,25 @@ function cliPhar($sigName='sha256', $private_key_file=''){
             $phar->delete($file);
         }
     }
+    // /web/index.php
+    $phar->addFromString('web/index.php', "<?php
+//Phar包路径处理
+if (class_exists(Phar::class, false) && Phar::running(false)) {
+    define('MY_PHAR_RUNNING', Phar::running());
+    define('APP_RUN_DIR', dirname(Phar::running(false)));
+} else {
+    define('APP_RUN_DIR', __DIR__);
+}
+
+define('APP_PATH',__DIR__.'/../app');
+define('COMMON', __DIR__.'/../common');
+require __DIR__ . '/../vendor/autoload.php';
+require APP_RUN_DIR . '/conf.php';
+require __DIR__ . '/../vendor/myphps/myphp/base.php';
+myphp::Run();");
 
     echo '开始生成Phar',PHP_EOL;
+    //在直接使用my.phar时直接执行app.php
     $phar->setStub("#!/usr/bin/env php
 <?php
 define('IN_PHAR', true);
@@ -135,8 +161,20 @@ __HALT_COMPILER();
     //复制配置文件
     copy(__DIR__ . '/app.conf.php', __DIR__ . '/dist/app.conf.php');
     copy(__DIR__ . '/conf.php', __DIR__ . '/dist/conf.php');
+    copy(__DIR__ . '/web/.htaccess', __DIR__ . '/dist/web/.htaccess');
     //生成脚本执行文件
     copy(__DIR__.'/my.bat', __DIR__.'/dist/my.bat');
+    copy(__DIR__ . '/cmd.php', __DIR__ . '/dist/cmd.php');
+    copy(__DIR__ . '/queue.sh', __DIR__ . '/dist/queue.sh');
+    file_put_contents(__DIR__.'/dist/cli.php', "#!/usr/bin/env php
+<?php
+/*
+结合crontab使用
+#执行命令
+* * * * * cd pwd && /usr/bin/sh ./queue.sh Queue 2
+* * * * * cd pwd && /usr/bin/sh ./queue.sh ClearTmp
+*/
+require 'phar://my.phar/cli.php';");
     file_put_contents(__DIR__.'/dist/my', "#!/usr/bin/env php
 <?php
 /**
@@ -145,6 +183,9 @@ __HALT_COMPILER();
  * my [--run=指定应用目录] [m/]c/a [\"b=1&d=1\"|b=1 d=1]
  */
 require 'phar://my.phar/my';");
+    //web
+    file_put_contents(__DIR__.'/dist/web/index.php', "<?php
+require 'phar://../my.phar/web/index.php';");
 
     echo 'Phar生成完成',PHP_EOL;
 }
@@ -203,4 +244,19 @@ function cliQueue($size=100){
     redis()->decr('__queue_run');
 
     echo 'queue ok['.$n.']',PHP_EOL;
+}
+
+/**
+ * 每10分钟执行一次 清除临时图片
+ * php cli.php ClearTmp
+ */
+function cliClearTmp(){
+    //清除tmp过期图片 使用定时任务来处理
+    echo SITE_WEB . '/tmp run clear' . PHP_EOL;
+    $clearTmp = new \myphp\File();
+    $clearTmp->setDir(SITE_WEB . '/tmp');
+    $clearTmp->clear(3600, true);
+    //$clearTmp->setDir(ROOT.'/tmp');
+    //$clearTmp->clear(3600, true);
+    echo SITE_WEB . '/tmp run end' . PHP_EOL;
 }

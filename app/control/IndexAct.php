@@ -31,4 +31,8 @@ class IndexAct extends Base{
     public function date(){
 	    return date("Y-m-d H:i:s");
     }
+
+    public function cfg(){
+	    return \myphp::$cfg;
+    }
 }

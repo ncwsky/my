@@ -1,7 +1,7 @@
 <?php
 //Phar包路径处理
 if (class_exists(Phar::class, false) && Phar::running(false)) {
-    define('MY_PHAR_RUNNING', Phar::running());
+    define('MY_PHAR_PATH', Phar::running());
     define('APP_RUN_DIR', dirname(Phar::running(false)));
 } else {
     define('APP_RUN_DIR', __DIR__);
@@ -132,25 +132,20 @@ function cliPhar($sigName='sha256', $private_key_file=''){
     // /web/index.php
     $phar->addFromString('web/index.php', "<?php
 //Phar包路径处理
-if (class_exists(Phar::class, false) && Phar::running(false)) {
-    define('MY_PHAR_RUNNING', Phar::running());
-    define('APP_RUN_DIR', dirname(Phar::running(false)));
-} else {
-    define('APP_RUN_DIR', __DIR__);
-}
+define('MY_PHAR_PATH', Phar::running());
+define('APP_RUN_DIR', dirname(Phar::running(false)));
 
-define('APP_PATH',__DIR__.'/../app');
-define('COMMON', __DIR__.'/../common');
-require __DIR__ . '/../vendor/autoload.php';
+define('APP_PATH', MY_PHAR_PATH.'/app');
+define('COMMON', MY_PHAR_PATH.'/common');
+require MY_PHAR_PATH . '/vendor/autoload.php';
 require APP_RUN_DIR . '/conf.php';
-require __DIR__ . '/../vendor/myphps/myphp/base.php';
+require MY_PHAR_PATH . '/vendor/myphps/myphp/base.php';
 myphp::Run();");
 
     echo '开始生成Phar',PHP_EOL;
     //在直接使用my.phar时直接执行app.php
     $phar->setStub("#!/usr/bin/env php
 <?php
-define('IN_PHAR', true);
 Phar::mapPhar('my');
 require 'phar://my/app.php';
 __HALT_COMPILER();

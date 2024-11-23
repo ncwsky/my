@@ -35,4 +35,11 @@ class IndexAct extends Base{
     public function cfg(){
 	    return \myphp::$cfg;
     }
+
+    public function root(){
+        return ['root'=>ROOT];
+    }
+    public function env(){
+	    return \myphp::$env;
+    }
 }

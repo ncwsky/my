@@ -74,6 +74,9 @@ if (defined('MY_PHAR_PATH')) {
     define('RUNTIME', APP_RUN_DIR . '/runtime');
     //站点目录
     define('SITE_WEB', APP_RUN_DIR . '/web');
+
+    //workerman状态
+    $config['setting']['statusFile'] = APP_RUN_DIR . '/log/app.status';
 }
 //onWorker
 $config['worker_load'] = [

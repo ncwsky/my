@@ -18,8 +18,17 @@ if (!$isSwoole && !SrvBase::workermanCheck() && defined('SWOOLE_VERSION')) {
     $isSwoole = true;
 }
 
+//Phar包路径处理
+if (class_exists(Phar::class, false) && Phar::running(false)) {
+    define('MY_PHAR_PATH', Phar::running());
+    define('APP_RUN_DIR', dirname(Phar::running(false)));
+    $_SERVER['SCRIPT_FILENAME'] = Phar::running(false); //重置
+} else {
+    define('APP_RUN_DIR', __DIR__);
+}
+
 if (GetOpt::has('h', 'help')) {
-    echo 'Usage: php app.php OPTION [restart|reload|stop]
+    echo 'Usage: php '.basename($_SERVER['SCRIPT_FILENAME']).' OPTION [restart|reload|stop]
     or: app.php OPTION [restart|reload|stop]
     
     -h --help
@@ -51,14 +60,6 @@ function cpu_num()
         }
     }
     return $num > 0 ? $num : 4;
-}
-
-//Phar包路径处理
-if (class_exists(Phar::class, false) && Phar::running(false)) {
-    define('MY_PHAR_PATH', Phar::running());
-    define('APP_RUN_DIR', dirname(Phar::running(false)));
-} else {
-    define('APP_RUN_DIR', __DIR__);
 }
 
 if (!is_dir(APP_RUN_DIR . '/log')) {

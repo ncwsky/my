@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace common;
 
 class Rsa
@@ -53,8 +56,9 @@ class Rsa
      * @param string $data
      * @return null|string
      */
-    public function privateEncrypt($data = '') {
-        if ( !is_string($data) ) {
+    public function privateEncrypt($data = '')
+    {
+        if (!is_string($data)) {
             return null;
         }
         $encrypted = "";
@@ -62,7 +66,7 @@ class Rsa
         $partLen = $this->keyLen / 8 - 11;
         $data = str_split($data, $partLen);
         $privateKey = $this->_getPrivateKey();
-        foreach ( $data as $item ) {
+        foreach ($data as $item) {
             openssl_private_encrypt($item, $tmpEncrypted, $privateKey);#die(var_dump($data));
             $encrypted .= $tmpEncrypted;
         }
@@ -85,7 +89,7 @@ class Rsa
         $partLen = $this->keyLen / 8 - 11;
         $data = str_split($data, $partLen);
         $publicKey = $this->_getPublicKey();
-        foreach ( $data as $item ) {
+        foreach ($data as $item) {
             openssl_public_encrypt($item, $tmpEncrypted, $publicKey);#die(var_dump($data));
             $encrypted .= $tmpEncrypted;
         }
@@ -107,9 +111,9 @@ class Rsa
         $tmpDecrypted = '';
         $privateKey = $this->_getPrivateKey();
         $partLen = $this->keyLen / 8;
-        foreach ( str_split($encrypted, $partLen) as $chunk ) {
+        foreach (str_split($encrypted, $partLen) as $chunk) {
             $res = openssl_private_decrypt($chunk, $tmpDecrypted, $privateKey);
-            if ( !$res ) {
+            if (!$res) {
                 echo openssl_error_string()."\r\n";
             }
             $decrypted .= $tmpDecrypted;
@@ -218,23 +222,29 @@ class Rsa
     public static function formatPublicKey($publicKey)
     {
         $start = "-----BEGIN PUBLIC KEY-----\n";
-        if (strpos($publicKey, $start) !== false) return $publicKey;
+        if (strpos($publicKey, $start) !== false) {
+            return $publicKey;
+        }
         return $start . wordwrap($publicKey, 64, "\n", true) . "\n-----END PUBLIC KEY-----";
     }
 
     public static function formatPrivateKey($privateKey)
     {
         $start = '-----BEGIN RSA PRIVATE KEY-----' . "\n";
-        if (strpos($privateKey, $start) !== false) return $privateKey;
+        if (strpos($privateKey, $start) !== false) {
+            return $privateKey;
+        }
         return $start . wordwrap($privateKey, 64, "\n", true) . "\n" . '-----END RSA PRIVATE KEY-----';
     }
 
-    public static function url_safe_base64_encode ($data) {
-        return str_replace(array('+','/', '='),array('-','_', ''), base64_encode($data));
+    public static function url_safe_base64_encode($data)
+    {
+        return str_replace(['+','/', '='], ['-','_', ''], base64_encode($data));
     }
 
-    public static function url_safe_base64_decode ($data) {
-        $base_64 = str_replace(array('-','_'),array('+','/'), $data);
+    public static function url_safe_base64_decode($data)
+    {
+        $base_64 = str_replace(['-','_'], ['+','/'], $data);
         return base64_decode($base_64);
     }
 
@@ -244,7 +254,8 @@ class Rsa
      * @param $exponent
      * @return string
      */
-    public static function createPublicKey($modulus, $exponent) {
+    public static function createPublicKey($modulus, $exponent)
+    {
         // 将十六进制转换为二进制
         $modBin = pack('H*', $modulus);
         $expBin = pack('H*', $exponent);
@@ -271,7 +282,7 @@ class Rsa
         // 组合RSA公钥序列
         $rsaSeq = "\x30" . self::encodeLength(strlen($modSeq) + strlen($expSeq)) . $modSeq . $expSeq;
 
-        $rsaSeq = "\x03".self::encodeLength(strlen($rsaSeq)+1)."\x0".$rsaSeq;
+        $rsaSeq = "\x03".self::encodeLength(strlen($rsaSeq) + 1)."\x0".$rsaSeq;
         // 添加RSA算法标识符
         $algoSeq = "\x30\x0D" .
             "\x06\x09\x2A\x86\x48\x86\xF7\x0D\x01\x01\x01" . // RSA加密的OID  1.2.840.113549.1.1.1
@@ -285,7 +296,8 @@ class Rsa
             "-----END PUBLIC KEY-----\n";
     }
 
-    public static function encodeLength($length) {
+    public static function encodeLength($length)
+    {
         if ($length < 128) {
             return chr($length);
         }
@@ -303,11 +315,16 @@ class Rsa
      * @param string $publicKey
      * @return array|bool
      */
-    public static function pub2modExp($publicKey){
+    public static function pub2modExp($publicKey)
+    {
         $key = openssl_pkey_get_public($publicKey);
-        if (!$key) return false;
+        if (!$key) {
+            return false;
+        }
         $pKey = openssl_pkey_get_details($key);
-        if (!$pKey) return false;
+        if (!$pKey) {
+            return false;
+        }
         return ['n' => bin2hex($pKey['rsa']['n']), 'e' => bin2hex($pKey['rsa']['e'])];
     }
 }

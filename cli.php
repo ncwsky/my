@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 //Phar包路径处理
 if (class_exists(Phar::class, false) && Phar::running(false)) {
     define('MY_PHAR_PATH', Phar::running());
@@ -34,9 +36,10 @@ $params = array_slice($_SERVER['argv'], 2);
 cliRun($a, $params);
 
 //脚本命令处理
-function cliRun($a, $params){
+function cliRun($a, $params)
+{
     try {
-        if(!function_exists($a)){
+        if (!function_exists($a)) {
             throw new \Exception($a .' not exists');
         }
         $ret = call_user_func_array($a, $params);
@@ -44,7 +47,7 @@ function cliRun($a, $params){
             echo $ret ? 'ok' : 'fail:'.\myphp\Tool::err();
         } elseif (is_scalar($ret)) {
             echo $ret;
-        } elseif($ret!==null) {
+        } elseif ($ret !== null) {
             echo toJson($ret);
         }
     } catch (\Throwable $e) {
@@ -62,17 +65,18 @@ function cliRun($a, $params){
  * @param string $dbName
  * @throws Exception
  */
-function cliModel($table='1', $namespace='common\model', $baseName='\myphp\Model', $dbName='db'){
+function cliModel($table = '1', $namespace = 'common\model', $baseName = '\myphp\Model', $dbName = 'db')
+{
     if ($table != '1') {
         $tables = strpos($table, ',') ? explode(',', $table) : [$table];
     } else {
         $tables = db($dbName)->getTables();
     }
-    foreach ($tables as $name){
+    foreach ($tables as $name) {
         $ret = \myphp\Tool::initModel($name, $namespace, $baseName, $dbName);
-        if($ret){
+        if ($ret) {
             echo $name.': ok'.PHP_EOL;
-        }else{
+        } else {
             echo $name.': fail:'.\myphp\Tool::err().PHP_EOL;
         }
     }
@@ -86,7 +90,8 @@ function cliModel($table='1', $namespace='common\model', $baseName='\myphp\Model
  * @param int $sigName
  * @param string $private_key_file
  */
-function cliPhar($sigName='sha256', $private_key_file=''){
+function cliPhar($sigName = 'sha256', $private_key_file = '')
+{
     if (!is_dir(__DIR__ . '/dist/web')) {
         mkdir(__DIR__ . '/dist/web', 0755, true);
     }
@@ -125,7 +130,7 @@ function cliPhar($sigName='sha256', $private_key_file=''){
         'conf.local.php'
     ];
     foreach ($exFiles as $file) {
-        if($phar->offsetExists($file)){
+        if ($phar->offsetExists($file)) {
             $phar->delete($file);
         }
     }
@@ -190,7 +195,8 @@ require 'phar://../my.phar/web/index.php';");
  * php cli.php Queue
  * @param int $size
  */
-function cliQueue($size=100){
+function cliQueue($size = 100)
+{
     $run = (int)redis()->get('__queue_run');
     if ($run >= 10) {
         echo '最多允许10个处理进程', PHP_EOL;
@@ -213,7 +219,7 @@ function cliQueue($size=100){
         //处理队列
         while ($data = redis()->lpop('__queue')) {
             $n++;
-            list($func, $params) = json_decode($data, true);
+            [$func, $params] = json_decode($data, true);
             $start_time = microtime(true);
             echo date("Y/m/d H:i:s").' start: ' . $data, PHP_EOL;
             if (function_exists($func)) {
@@ -230,7 +236,9 @@ function cliQueue($size=100){
             }
             echo date("Y/m/d H:i:s").' end: '.run_time($start_time), PHP_EOL;
 
-            if ($n > $size) break; //限制条数 防止有数据时进程一直处理
+            if ($n > $size) {
+                break;
+            } //限制条数 防止有数据时进程一直处理
         }
     } catch (\Exception $e) {
         //todo alarm
@@ -245,7 +253,8 @@ function cliQueue($size=100){
  * 每10分钟执行一次 清除临时图片
  * php cli.php ClearTmp
  */
-function cliClearTmp(){
+function cliClearTmp()
+{
     //清除tmp过期图片 使用定时任务来处理
     echo SITE_WEB . '/tmp run clear' . PHP_EOL;
     $clearTmp = new \myphp\File();

@@ -1,8 +1,12 @@
 <?php
+
+declare(strict_types=1);
+
 namespace common;
 
 use myphp\Helper;
 use PHPExcel_Style_Alignment;
+
 //excel导出
 class OutExcel
 {
@@ -10,8 +14,9 @@ class OutExcel
 
     public static $csv = false;
     public static $pFilename = 'php://output';
-    public static function disToName($name){
-        $name = str_replace(['\\','/',':','*','?','"','<','>','|'],'',$name);
+    public static function disToName($name)
+    {
+        $name = str_replace(['\\','/',':','*','?','"','<','>','|'], '', $name);
         $utfName = rawurlencode(str_replace(['%'], '', $name));
 
         $disToHeader = "attachment; filename=\"{$name}\"";
@@ -28,14 +33,15 @@ class OutExcel
      * @param null|\Closure $eachFun
      * @param bool $isOver 是否写入结束 默认是
      */
-    public static function putCsv($title, $data, $headers, $eachFun=null, $isOver=true){
+    public static function putCsv($title, $data, $headers, $eachFun = null, $isOver = true)
+    {
         static $fp;
-        $io_out = self::$pFilename=='php://output';
+        $io_out = self::$pFilename == 'php://output';
         if ($io_out) {
             //header('Content-Type: text/csv; charset=utf-8');
             //header('Content-Disposition: ' . self::disToName($title . '.csv'));
             $res = \myphp::res();
-            $first = $res->getHeaderLine('Content-Type')!='text/csv; charset=utf-8';
+            $first = $res->getHeaderLine('Content-Type') != 'text/csv; charset=utf-8';
             $res->withHeader('Content-Type', 'text/csv; charset=utf-8')
                 ->withHeader('Content-Disposition', self::disToName($title . '.csv'));
 
@@ -75,7 +81,7 @@ class OutExcel
                 $res->withBody(ob_get_clean());
             }
             fclose($fp);
-            self::$pFilename='php://output'; //重置
+            self::$pFilename = 'php://output'; //重置
             $fp = null;
         }
     }
@@ -90,14 +96,15 @@ class OutExcel
      * @throws \Box\Spout\Common\Exception\IOException
      * @throws \Box\Spout\Writer\Exception\WriterNotOpenedException
      */
-    public static function putSpout($title, $data, $headers, $eachFun=null, $isOver=true){
+    public static function putSpout($title, $data, $headers, $eachFun = null, $isOver = true)
+    {
         static $writer;
-        $io_out = self::$pFilename=='php://output';
+        $io_out = self::$pFilename == 'php://output';
         if ($io_out) {
             //header('Content-Type: text/csv; charset=utf-8');
             //header('Content-Disposition: ' . self::disToName($title . '.csv'));
             $res = \myphp::res();
-            $first = $res->getHeaderLine('Content-Type')!='text/csv; charset=utf-8';
+            $first = $res->getHeaderLine('Content-Type') != 'text/csv; charset=utf-8';
             $res->withHeader('Content-Type', 'text/csv; charset=utf-8')
                 ->withHeader('Content-Disposition', self::disToName($title . '.xlsx'));
 
@@ -112,7 +119,6 @@ class OutExcel
             // $writer = WriterEntityFactory::createODSWriter();
             // $writer = WriterEntityFactory::createCSVWriter();
             $writer->openToFile(self::$pFilename);
-
 
             //使用样式生成器创建样式
             $style = (new \Box\Spout\Writer\Common\Creator\Style\StyleBuilder())
@@ -178,7 +184,7 @@ class OutExcel
      * @throws \PHPExcel_Reader_Exception
      * @throws \PHPExcel_Writer_Exception
      */
-    public static function put($title, $data, $headers, $eachFun=null, $headFun=null, $rowIndex = 2)
+    public static function put($title, $data, $headers, $eachFun = null, $headFun = null, $rowIndex = 2)
     {
         if (self::$csv) {
             self::$csv = false;
@@ -192,10 +198,10 @@ class OutExcel
         $sheetAct = $phpExcel->setActiveSheetIndex(0);
         $sheetAct->setTitle($title);
 
-        if($headFun instanceof \Closure){
+        if ($headFun instanceof \Closure) {
             $headFun($sheetAct, $phpExcel);
         }
-        $headN = $rowIndex-1;
+        $headN = $rowIndex - 1;
         // 设置表头
         self::setHeader($sheetAct, $headers, $headN);
 
@@ -224,17 +230,20 @@ class OutExcel
         self::$pFilename = 'php://output'; //重置
     }
     // 设置表头
-    public static function setHeader($sheetAct, &$headers, $headN=1){
-        if(isset($headers[0])){ #普通数组 自动生成列名
-            $_headers = []; $n=0; $_pre = '';
-            foreach($headers as $head){
-                $_n = $n%26;
-                $_c = intval($n/26);
-                if($_c>0){
+    public static function setHeader($sheetAct, &$headers, $headN = 1)
+    {
+        if (isset($headers[0])) { #普通数组 自动生成列名
+            $_headers = [];
+            $n = 0;
+            $_pre = '';
+            foreach ($headers as $head) {
+                $_n = $n % 26;
+                $_c = intval($n / 26);
+                if ($_c > 0) {
                     $_c--;
-                    $_pre = chr($_c+65);
+                    $_pre = chr($_c + 65);
                 }
-                $key = $_pre.chr($_n+65);
+                $key = $_pre.chr($_n + 65);
                 $_headers[$key] = $head;
                 $n++;
             }
@@ -250,24 +259,25 @@ class OutExcel
             }
             // 行宽高
             $sheetAct->getRowDimension($key)->setRowHeight(20);
-            $sheetAct->getColumnDimension($key)->setWidth($value['width']??20);
+            $sheetAct->getColumnDimension($key)->setWidth($value['width'] ?? 20);
             // 设置样式
             $PHPExcel_Style = $sheetAct->setCellValue($key . $headN, $value['name'])->getStyle($key . $headN);
             $PHPExcel_Style->getFont()->setBold(true);
             $PHPExcel_Style->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT)->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
         }
     }
-    public static function setData(\PHPExcel_Worksheet $sheetAct, $headers, $data, &$rowIndex=2, $eachFun=null){
+    public static function setData(\PHPExcel_Worksheet $sheetAct, $headers, $data, &$rowIndex = 2, $eachFun = null)
+    {
         //输出行记录
         foreach ($data as $item) {
-            if($eachFun instanceof \Closure){
+            if ($eachFun instanceof \Closure) {
                 $eachFun($item); //传址处理
             }
             foreach ($headers as $key => $value) {
-                if($value['key'] !== null){
-                    $res = $value['key'] instanceof \Closure ? $value['key']($item) : $item[$value['key']]??'';
+                if ($value['key'] !== null) {
+                    $res = $value['key'] instanceof \Closure ? $value['key']($item) : $item[$value['key']] ?? '';
                     $dataType = $value['type'] ?? false;
-                    if($dataType && in_array($dataType, [
+                    if ($dataType && in_array($dataType, [
                         \PHPExcel_Cell_DataType::TYPE_STRING2,
                         \PHPExcel_Cell_DataType::TYPE_STRING,
                         \PHPExcel_Cell_DataType::TYPE_FORMULA,
@@ -281,7 +291,7 @@ class OutExcel
                     } else {
                         $sheetAct->setCellValue($key . $rowIndex, $res);
                     }
-                }else{
+                } else {
                     $sheetAct->setCellValue($key . $rowIndex, '');
                 }
             }
@@ -304,7 +314,9 @@ class OutExcel
         do {
             $remainder = $index / $len;  // 商数
             $quotient = $index % $len;  // 余数
-            if ($remainder < 1) $quotient -= 1;
+            if ($remainder < 1) {
+                $quotient -= 1;
+            }
             $char = $characters[$quotient]; // 字符位置
             $prefix = $char . $prefix;
             $index = $remainder;
@@ -312,48 +324,60 @@ class OutExcel
         return $prefix;
     }
 
-    const ADM_EXPORT_ORDER = 'admin/order/export';
+    public const ADM_EXPORT_ORDER = 'admin/order/export';
 
-    const EXPIRE = 7200; //下载及缓存有效期
+    public const EXPIRE = 7200; //下载及缓存有效期
     #是否有导出或生成下载列表
-    public static function hasExportList($uid, $cmd){
-        return redis()->keys($cmd.':'.$uid.':*')?true:false;
+    public static function hasExportList($uid, $cmd)
+    {
+        return redis()->keys($cmd.':'.$uid.':*') ? true : false;
     }
     #获取指定导出的生成列表
-    public static function toExportList($uid, $cmd){
+    public static function toExportList($uid, $cmd)
+    {
         $keys = redis()->keys($cmd.':'.$uid.':*');
         $list = [];
-        foreach ($keys as $v){
+        foreach ($keys as $v) {
             $val = redis()->get($v);
-            $val['expire'] = time()+redis()->ttl($v);
+            $val['expire'] = time() + redis()->ttl($v);
             $list[] = $val;
         }
         return $list;
     }
     #设置导出的生成状态
-    public static function toExportStatusOk($uid, $cmd, $params){
+    public static function toExportStatusOk($uid, $cmd, $params)
+    {
         $name = md5(toJson($params));
         $key = $cmd . ':' . $uid . ':' . $name;
         $data = redis()->get($key);
-        if (!$data) return false;
+        if (!$data) {
+            return false;
+        }
         $data['mtime'] = time(); //完成时间
         $data['status'] = 1;
         redis()->set($key, $data, self::EXPIRE);
         return true;
     }
 
-    public static function realExportFile($uid, $params, $csv = null, $prefixName='')
+    public static function realExportFile($uid, $params, $csv = null, $prefixName = '')
     {
         $name = md5(toJson($params));
         $dir = SITE_WEB . '/up/export';
-        if (!is_dir($dir)) mkdir($dir, 0755, true);
-        if ($csv === null) $csv = self::$csv;
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+        if ($csv === null) {
+            $csv = self::$csv;
+        }
         $suffix = $csv ? '.csv' : '.xlsx';
         return $dir . '/' . $prefixName.$name . $suffix;
     }
 
-    public static function toExport($uid, $cmd, $params, $csv=null, $prefixName=''){
-        if ($csv === null) $csv = self::$csv;
+    public static function toExport($uid, $cmd, $params, $csv = null, $prefixName = '')
+    {
+        if ($csv === null) {
+            $csv = self::$csv;
+        }
         $name = md5(toJson($params));
         $suffix = $csv ? '.csv' : '.xlsx';
 
@@ -366,7 +390,7 @@ class OutExcel
             $time = time();
             $fileName = $prefixName.$name;
             $url = U('/up/export/' . $fileName . $suffix . '?t=' . $time);
-            $data = ['name'=>$fileName, 'ctime'=>$time, 'mtime'=>0, 'status'=>0, 'url'=>$url]; //0表示生成中
+            $data = ['name' => $fileName, 'ctime' => $time, 'mtime' => 0, 'status' => 0, 'url' => $url]; //0表示生成中
             redis()->set($key, $data, self::EXPIRE);
 
             $params['_uid'] = $uid; //标识操作人
@@ -381,17 +405,19 @@ class OutExcel
         return true;
     }
 
-    public static function toExportClean(){
+    public static function toExportClean()
+    {
         $dirs = [
             SITE_WEB.'/up/export'
         ];
         $time = time();
         $n = 0;
         $out = '';
-        foreach ($dirs as $dir){
-            if(!is_dir($dir)) @mkdir($dir, 0775, true);
-            foreach(glob($dir.'/*.{csv,xls,xlsx,json}', GLOB_NOSORT|GLOB_BRACE ) as $export) #GLOB_BRACE - 扩充 {a,b,c} 来匹配 'a'，'b' 或 'c'
-            {
+        foreach ($dirs as $dir) {
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0775, true);
+            }
+            foreach (glob($dir.'/*.{csv,xls,xlsx,json}', GLOB_NOSORT | GLOB_BRACE) as $export) { #GLOB_BRACE - 扩充 {a,b,c} 来匹配 'a'，'b' 或 'c'
                 $diff = $time - filemtime($export);
                 if ($diff > OutExcel::EXPIRE) { #超过x的导出清除
                     $out .= $export . '->' . date("Y-m-d H:i:s", filemtime($export)). PHP_EOL;

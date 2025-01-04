@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace common;
 
 //用户验证类
@@ -27,7 +29,7 @@ class UserAuth extends BaseAuth
         } elseif (isset($_GET['token'])) {
             $auth = $_GET['token'];
         }
-        if(strpos($auth, 'Bearer')===0){
+        if (strpos($auth, 'Bearer') === 0) {
             $auth = substr($auth, 7);
         }
 

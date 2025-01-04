@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * @param string $name
  * @return lib_redis
@@ -25,7 +27,8 @@ function getCache()
 }
 
 //循环日期记录
-function cLog($name='clog'){
+function cLog($name = 'clog')
+{
     static $log;
     if (!isset($log[$name])) {
         $log[$name] = new RotateLog(RUNTIME . '/' . $name . '.log'); //, RotateLog::MODE_FIXED, 0.5*1024*1024
@@ -51,7 +54,8 @@ retryErrLimitIp('标识', true, $errMsg);
 //清除错误次数
 retryErrLimitIp('标识', null);
  */
-function retryErrLimitIp($name, $record=true, &$errMsg='', $allowTimes=6, $limitMinute=10){
+function retryErrLimitIp($name, $record = true, &$errMsg = '', $allowTimes = 6, $limitMinute = 10)
+{
     //登陆限制 通过ip
     $ip = \myphp\Helper::getIp();
     #$allowTimes = 6;
@@ -82,7 +86,8 @@ function retryErrLimitIp($name, $record=true, &$errMsg='', $allowTimes=6, $limit
  * @param array $params
  * @return string
  */
-function buildUrl($name, $url, $params = []){
+function buildUrl($name, $url, $params = [])
+{
     $url = GetC('domain.'.$name) . '/' . ltrim($url, '/');
     if ($params) {
         $url .= (strpos($url, '?') ? '&' : '?') . http_build_query($params);
@@ -100,7 +105,8 @@ function adminUrl($url, $params = [])
     return buildUrl('admin', $url, $params);
 }
 
-function toLog($msg, $tag='info'){
+function toLog($msg, $tag = 'info')
+{
     \myphp\Log::write($msg, $tag);
 }
 
@@ -109,7 +115,7 @@ function toLog($msg, $tag='info'){
  * @param array|string|null $params 参数，使用空格分隔
  * @param int $time 延时指定执行时间
  */
-function queueCli($func, $params = null, $time=0)
+function queueCli($func, $params = null, $time = 0)
 {
     $data = toJson([$func, $params]);
     if ($time > time()) {
@@ -134,10 +140,10 @@ function pwd($val, $cost = 10)
 }
 
 //生成订单号
-function orderSN($prefix=0, $s='1')
+function orderSN($prefix = 0, $s = '1')
 {
     //$chars = substr(microtime(),2,6);
-    $sn = date('ymdHis'). str_pad(rand(0, 99), 2, '0', STR_PAD_LEFT) .substr(microtime(),2,4); //18位
+    $sn = date('ymdHis'). str_pad(rand(0, 99), 2, '0', STR_PAD_LEFT) .substr(microtime(), 2, 4); //18位
     return $s . str_pad($prefix, 5, '0', STR_PAD_LEFT) . $sn; //24位
 }
 
@@ -150,7 +156,9 @@ function orderSN($prefix=0, $s='1')
  */
 function getAge($birth, $now = null)
 {
-    if ($now === null) $now = new \DateTime();
+    if ($now === null) {
+        $now = new \DateTime();
+    }
     $ori = new \DateTime($birth);
     $interval = $ori->diff($now);
     return $interval->y;
@@ -159,9 +167,13 @@ function getAge($birth, $now = null)
 function getProvince($code)
 {
     static $province = [];
-    if(isset($province[$code])) return $province[$code];
+    if (isset($province[$code])) {
+        return $province[$code];
+    }
     $name = db('city')->table('province')->where(['code' => $code])->val('name');
-    if(!$name) return '';
+    if (!$name) {
+        return '';
+    }
     $province[$code] = $name;
     return $province[$code];
 }
@@ -169,9 +181,13 @@ function getProvince($code)
 function getCity($code)
 {
     static $city = [];
-    if(isset($city[$code])) return $city[$code];
+    if (isset($city[$code])) {
+        return $city[$code];
+    }
     $name = db('city')->table('city')->where(['code' => $code])->val('name');
-    if(!$name) return '';
+    if (!$name) {
+        return '';
+    }
     $city[$code] = $name;
     return $city[$code];
 }
@@ -179,9 +195,13 @@ function getCity($code)
 function getArea($code)
 {
     static $area = [];
-    if(isset($area[$code])) return $area[$code];
+    if (isset($area[$code])) {
+        return $area[$code];
+    }
     $name = db('city')->table('area')->where(['code' => $code])->val('name');
-    if(!$name) return '';
+    if (!$name) {
+        return '';
+    }
     $area[$code] = $name;
     return $area[$code];
 }
@@ -194,14 +214,18 @@ function getArea($code)
  * @param string $size 输出大小 min(600\,iw):-1 最大宽度600高等比
  * @return bool
  */
-function video2img($video, $img, $offset = -1, $q = 5, $size='')
+function video2img($video, $img, $offset = -1, $q = 5, $size = '')
 {
-    if ($offset == -1) $offset = mt_rand(0, 10); //随机起始秒
+    if ($offset == -1) {
+        $offset = mt_rand(0, 10);
+    } //随机起始秒
     if (!is_file($video)) {
         myphp::err('No such file');
         return false;
     }
-    if($size) $size = '-vf scale="'.$size.'"';
+    if ($size) {
+        $size = '-vf scale="'.$size.'"';
+    }
     $cmd = "ffmpeg -y -i $video -ss $offset -r 1 -v 16 -q:v $q $size -frames:v 1 -f image2 $img";
     $descriptorspec = [
         ["pipe", "r"],  // 标准输入，子进程从此管道中读取数据
@@ -254,52 +278,58 @@ function avgDir($id, $dir = '', $base = 1000)
 }
 
 //是否支付宝
-function isAlipay(){
-    if ( isset($_SERVER['HTTP_USER_AGENT']) && strpos($_SERVER['HTTP_USER_AGENT'], 'Alipay') !== false ) {
+function isAlipay()
+{
+    if (isset($_SERVER['HTTP_USER_AGENT']) && strpos($_SERVER['HTTP_USER_AGENT'], 'Alipay') !== false) {
         return true;
     }
     return false;
 }
 //加锁 解锁 主要用于保证并发时操作的原子性 会阻塞
-function redisLock($lockKey, $lockTimeout=10){
-    if($lockTimeout==0){ //释放锁
+function redisLock($lockKey, $lockTimeout = 10)
+{
+    if ($lockTimeout == 0) { //释放锁
         return redis()->del($lockKey);
     }
-    do{
+    do {
         $num = redis()->incr($lockKey);
-        if($num==1){
+        if ($num == 1) {
             redis()->expire($lockKey, $lockTimeout); //获得锁 加过期时间 防止意外终止锁不释放
             #sleep(5);
-        }else{
+        } else {
             #echo 'waiting...'.microtime(),PHP_EOL;
             usleep(100000); //睡眠，降低抢锁频率，缓解redis压力，针对问题2
         }
-    }while($num>1);
+    } while ($num > 1);
     return true;
 }
 //加锁 解锁 主要用于判断是否重复操作
-function redisLockOnce($lockKey, $lockTimeout=10, $redis=null){
-    if(!$redis) $redis = redis();
-    if($lockTimeout==0){ //释放锁
+function redisLockOnce($lockKey, $lockTimeout = 10, $redis = null)
+{
+    if (!$redis) {
+        $redis = redis();
+    }
+    if ($lockTimeout == 0) { //释放锁
         return $redis->del($lockKey);
     }
     $num = $redis->incr($lockKey);
-    if($num==1){
+    if ($num == 1) {
         $redis->expire($lockKey, $lockTimeout); //获得锁 加过期时间 防止意外终止锁不释放
         return true;
-    }else{
+    } else {
         return false;
     }
 }
 //加锁带回调处理逻辑 会阻塞
-function redisLockCall($lockKey, $lockVal, $callback=null, $lockTimeout=10){
+function redisLockCall($lockKey, $lockVal, $callback = null, $lockTimeout = 10)
+{
     $ret = null;
     do {  //针对问题1，使用循环
         $isLock = redis()->set($lockKey, $lockVal, 'nx', 'ex', $lockTimeout);//ex 秒  nx 只在键不存在时，才对键进行设置操作
         if ($isLock) {
             if (redis()->get($lockKey) == $lockVal) {  //防止提前过期，误删其它请求创建的锁
                 //执行内部代码
-                if($callback instanceof \Closure){
+                if ($callback instanceof \Closure) {
                     $ret = call_user_func($callback);
                 }
                 #sleep(5);
@@ -310,7 +340,7 @@ function redisLockCall($lockKey, $lockVal, $callback=null, $lockTimeout=10){
             #echo 'waiting...'.microtime(),PHP_EOL;
             usleep(100000); //睡眠，降低抢锁频率，缓解redis压力，针对问题2
         }
-    } while(!$isLock);
+    } while (!$isLock);
     return $ret;
 }
 /**
@@ -318,8 +348,11 @@ function redisLockCall($lockKey, $lockVal, $callback=null, $lockTimeout=10){
  * @param $key
  * @return int
  */
-function msgId($key=''){
-    if ($key == '') $key = '_kh_msg_id';
+function msgId($key = '')
+{
+    if ($key == '') {
+        $key = '_kh_msg_id';
+    }
     $message_id = redis()->incr($key);
     if ($message_id >= 0xFFFFFFFF) { #0xffffff
         redis()->set($key, 0);
@@ -331,7 +364,9 @@ function msgId($key=''){
 function openSign($key, $name = 'sign')
 {
     $data = \myphp\Helper::isPost() ? $_POST : $_GET;
-    if (!isset($data[$name])) return false;
+    if (!isset($data[$name])) {
+        return false;
+    }
     unset($data['c'], $data['a']);
     $sign = $data[$name];
     $md5 = getSign($key, $data, $name);
@@ -348,8 +383,10 @@ function getSign($key, $data = [], $name = 'sign')
     unset($data[$name]);
     ksort($data); //键名升序
     $string = '';
-    foreach ($data as $k=>$v){
-        if (!$string) $string .= '&';
+    foreach ($data as $k => $v) {
+        if (!$string) {
+            $string .= '&';
+        }
         $string .= $k . '=' . $v;
     }
     return md5(sprintf("%s+%s", $string, $key));
@@ -363,7 +400,7 @@ function getSign($key, $data = [], $name = 'sign')
  * @param bool $isTmp 是不是临时文件
  * @return string
  */
-function tmp2file($uid, $pic, $dir='', &$isTmp=false)
+function tmp2file($uid, $pic, $dir = '', &$isTmp = false)
 {
     $isTmp = false;
     if (strpos($pic, '/tmp/') !== false) { //临时文件 移动
@@ -395,22 +432,25 @@ function tmp2file($uid, $pic, $dir='', &$isTmp=false)
  * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
  * @throws \EasyWeChat\Kernel\Exceptions\RuntimeException
  */
-function miniQrCode($path, $scene, $val='', $qrFile='', $cfgName='wx_mini'){
+function miniQrCode($path, $scene, $val = '', $qrFile = '', $cfgName = 'wx_mini')
+{
     if (!$scene || preg_match("/[^\w!#$&'()*+,\/:;=?@\-._~]/", $scene)) {
         return \myphp::err('参数为空或格式无效');
     }
     //缓存数据
-    if ($val!=='') {
+    if ($val !== '') {
         redis()->setex('qr:' . $scene, 600, $val);
     }
 
     $app = \EasyWeChat\Factory::miniProgram(GetC($cfgName));
-    $env_version = $_GET['env_ver']??''; //指定版本  release, trial, develop
+    $env_version = $_GET['env_ver'] ?? ''; //指定版本  release, trial, develop
     $options = [
         'page'  => $path,
         'width' => 220,
     ];
-    if ($env_version) $options['env_version'] = $env_version;
+    if ($env_version) {
+        $options['env_version'] = $env_version;
+    }
     $response = $app->app_code->getUnlimit($scene, $options);
     $base64 = 1;
     // 保存小程序码 文件|base64
@@ -426,18 +466,19 @@ function miniQrCode($path, $scene, $val='', $qrFile='', $cfgName='wx_mini'){
         toLog($response, 'qrFail');
         return \myphp::err('小程序二维获取失败:'.$response['errmsg']);
     }
-    return ['scene'=>$scene, 'qr' => $qrFile, 'base64'=>$base64];
+    return ['scene' => $scene, 'qr' => $qrFile, 'base64' => $base64];
 }
 
 // 跳转提示信息输出: ([0,1]:)信息标题, url, 辅助信息, 等待时间（秒） 用于前端自动定义信息输出模板
-function outMsg($msg, $url='', $info='', $time = 1) {
+function outMsg($msg, $url = '', $info = '', $time = 1)
+{
     $is_url = false;
-    if ($url=='') {
+    if ($url == '') {
         $jumpUrl = 'javascript:close_win()';
         $js = 'close_win()';
-    } elseif (substr($url,0,11)=='javascript:') {
+    } elseif (substr($url, 0, 11) == 'javascript:') {
         $jumpUrl = $url;
-        $js = substr($url,11);
+        $js = substr($url, 11);
     } else {
         $jumpUrl = $url;
         $js = "window.location='$jumpUrl'";
@@ -456,10 +497,14 @@ function outMsg($msg, $url='', $info='', $time = 1) {
         }
     }
 
-    if (ob_get_length() !== false) ob_clean();//清除页面
+    if (ob_get_length() !== false) {
+        ob_clean();
+    }//清除页面
     if (\myphp\Helper::isAjax()) { //ajax输出
         $data = ['info' => $info, 'time' => $time];
-        if ($is_url) $data['_url'] = $jumpUrl;
+        if ($is_url) {
+            $data['_url'] = $jumpUrl;
+        }
         $json = ['code' => $code, 'msg' => $msg, 'data' => $data];
         if (IS_CLI) {
             \myphp::conType('application/json');
@@ -468,14 +513,15 @@ function outMsg($msg, $url='', $info='', $time = 1) {
         exit(\myphp\Helper::toJson($json));
     }
 
-    $out_html = '<!doctype html><html><head><meta charset="utf-8"><title>'.($url!='nil'?'跳转提示':'信息提示').'</title><style type="text/css">*{padding:0;margin:0}body{background:#fff;font-family:"Microsoft YaHei";color:#333;font-size:100%}.system-message{padding:1.5em 3em}.system-message h1{font-size:6.25em;font-weight:400;line-height:120%;margin-bottom:.12em}.system-message .jump{padding-top:.625em}.system-message .jump a{color:#333}.system-message .success{color:#207E05}.system-message .error{color:#da0404}.system-message .normal,.system-message .success,.system-message .error{line-height:1.8em;font-size:2.25em}.system-message .detail{font-size:1.2em;line-height:160%;margin-top:.8em}</style><script src='.ROOT_DIR.'"/static/js/comm.js"></script></head><body><div class="system-message">';
+    $out_html = '<!doctype html><html><head><meta charset="utf-8"><title>'.($url != 'nil' ? '跳转提示' : '信息提示').'</title><style type="text/css">*{padding:0;margin:0}body{background:#fff;font-family:"Microsoft YaHei";color:#333;font-size:100%}.system-message{padding:1.5em 3em}.system-message h1{font-size:6.25em;font-weight:400;line-height:120%;margin-bottom:.12em}.system-message .jump{padding-top:.625em}.system-message .jump a{color:#333}.system-message .success{color:#207E05}.system-message .error{color:#da0404}.system-message .normal,.system-message .success,.system-message .error{line-height:1.8em;font-size:2.25em}.system-message .detail{font-size:1.2em;line-height:160%;margin-top:.8em}</style><script src='.ROOT_DIR.'"/static/js/comm.js"></script></head><body><div class="system-message">';
 
     $out_html .= '<h1>'. ($code ? ':(' : ':)').'</h1><p class="'.$flag.'">'.$msg.'</p>'; //输出
 
-    $out_html .= $info!=''?'<p class="detail">'.$info.'</p>':'';
-    if($url!='nil') //提示不跳转
+    $out_html .= $info != '' ? '<p class="detail">'.$info.'</p>' : '';
+    if ($url != 'nil') { //提示不跳转
         $out_html .= '<p class="jump">页面自动 <a id="href" href="'.$jumpUrl.'">跳转</a>  等待时间： <b id="time">'.$time.'</b></p></div><script type="text/javascript">var pgo=0,t=setInterval(function(){var time=document.getElementById("time");var val=parseInt(time.innerHTML)-1;time.innerHTML=val;if(val<=0){clearInterval(t);if(pgo==0){pgo=1;'.$js.';}}},1000);</script></body></html>';
-    if(IS_CLI) {
+    }
+    if (IS_CLI) {
         \myphp::conType('text/html');
         return $out_html;
     }
@@ -487,7 +533,8 @@ function outMsg($msg, $url='', $info='', $time = 1) {
  * @param $domain
  * @return mixed|string
  */
-function dns2ip($domain){
+function dns2ip($domain)
+{
     return dns_get_record($domain, DNS_A)[0]['ip'] ?? '';
 }
 
@@ -497,7 +544,8 @@ function dns2ip($domain){
  * @param string $lan
  * @return bool
  */
-function inLanIp($domain, $lan='192.168.0.'){
+function inLanIp($domain, $lan = '192.168.0.')
+{
     $ip = dns2ip($domain);
     $remoteIp = '0.0.0.1';
     //toLog($_SERVER, 'srv');
@@ -510,7 +558,9 @@ function inLanIp($domain, $lan='192.168.0.'){
     } elseif (isset($_SERVER['REMOTE_ADDR'])) {
         $remoteIp = $_SERVER['REMOTE_ADDR'];
     }
-    if (strpos($remoteIp, $lan) === 0) return true; //内网
+    if (strpos($remoteIp, $lan) === 0) {
+        return true;
+    } //内网
     //toLog($ip.'---'.$remoteIp, 'ip');
     return $ip == $remoteIp;
 }
@@ -520,7 +570,8 @@ function inLanIp($domain, $lan='192.168.0.'){
  * @param $str
  * @return false|string|string[]|void|null
  */
-function filterEmoji($str){
+function filterEmoji($str)
+{
     return preg_replace_callback('/./u', function ($match) {return strlen($match[0]) >= 4 ? '' : $match[0];}, $str);
 }
 /**
@@ -528,11 +579,14 @@ function filterEmoji($str){
  * @param string $flag 标识名
  * @return mixed
  */
-function runtime($start=0, $flag=''){
+function runtime($start = 0, $flag = '')
+{
     static $flags, $time;
     if ($start) {
         if ($flag) {
-            if (!isset($time['__all'])) return 0;
+            if (!isset($time['__all'])) {
+                return 0;
+            }
             $time[$flag] = microtime(true);
         } else { //初始
             $time = ['__all' => microtime(true)];
@@ -543,7 +597,9 @@ function runtime($start=0, $flag=''){
         return 0;
     }
     if ($flag) {
-        if (!isset($time['__all'])) return 0;
+        if (!isset($time['__all'])) {
+            return 0;
+        }
         $run = number_format(microtime(true) - $time['__all'], 4);
         // [self, run]
         $flags[$flag] = isset($time[$flag]) ? [number_format(microtime(true) - $time[$flag], 4), $run] : $run;
@@ -558,7 +614,8 @@ function runtime($start=0, $flag=''){
  * @param int $start 非0耗时起始 0计算耗时
  * @return int|string
  */
-function costTime($start=0){
+function costTime($start = 0)
+{
     static $time;
     if ($start) {
         $time = microtime(true);

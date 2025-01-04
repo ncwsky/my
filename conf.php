@@ -1,30 +1,30 @@
 <?php
 $cfg = [
     //数据库连接信息
-    'db' => array(
+    'db' => [
         'dbms' => 'mysql', //数据库 mysql sqlite pgsql mssql oracle
         'server' => '127.0.0.1',    //数据库主机
         'name' => '',    //数据库名称
         'user' => '',    //数据库用户
         'pwd' => '',    //数据库密码
         'port' => 3306
-    ),
+    ],
     //城市数据
-    'city' => array(
+    'city' => [
         'dbms' => 'sqlite',
         'name' => '' // __DIR__.'/data.sqlite',	//城市数据 https://github.com/modood/Administrative-divisions-of-China/tree/master/dist
-    ),
-    'redis' => array(
+    ],
+    'redis' => [
         'host' => '127.0.0.1',
         'port' => 6379,
         'password' => '',
         'select' => 0 //选择库
-    ),/*
+    ],/*
     'session' => [
         //'type'=>'file',
         'expire' => 7200, //有效期
         /*
-	    'type'=> 'redis', //redis|file 内置处理 默认系统file
+        'type'=> 'redis', //redis|file 内置处理 默认系统file
         'prefix' => '_ss_', //用于非file方式的名前缀
         'host' => '127.0.0.1',
         'port' => 6379,

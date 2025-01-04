@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace common;
 
 /**
@@ -9,9 +11,9 @@ namespace common;
  */
 class Zip
 {
-    const EOF_CTRL_DIR = "\x50\x4b\x05\x06\x00\x00\x00\x00";
-    const NO_COMPRESS = 0; //不压缩
-    const DEF_COMPRESS = -1; //默认压缩级别，即6。
+    public const EOF_CTRL_DIR = "\x50\x4b\x05\x06\x00\x00\x00\x00";
+    public const NO_COMPRESS = 0; //不压缩
+    public const DEF_COMPRESS = -1; //默认压缩级别，即6。
 
     protected $ctrl_dir = [];
     protected $old_offset = 0;
@@ -71,17 +73,25 @@ class Zip
      */
     public function addPath($path, $dirName = '')
     {
-        if (!function_exists('gzcompress')) return;
+        if (!function_exists('gzcompress')) {
+            return;
+        }
 
         $files = $this->_getFileList($path);
-        if (count($files) == 0) return;
+        if (count($files) == 0) {
+            return;
+        }
         $d_len = strlen($path);
-        if ($dirName && substr($dirName, -1) != '/') $dirName .= '/';
+        if ($dirName && substr($dirName, -1) != '/') {
+            $dirName .= '/';
+        }
 
         foreach ($files as $file) {
             if (is_file($file)) {
                 $content = file_get_contents($file);
-                if ($content === false) throw new \Exception($file . ' read fail');
+                if ($content === false) {
+                    throw new \Exception($file . ' read fail');
+                }
             } else { //目录
                 $content = '';
             }
@@ -109,11 +119,15 @@ class Zip
                     $empty = false;
                     if (is_dir($dir . $file)) {
                         $files = array_merge($files, $this->_getFileList($dir . $file));
-                    } else $files[] = $dir . $file;
+                    } else {
+                        $files[] = $dir . $file;
+                    }
                 }
             }
             closedir($dh);
-            if ($empty) $files[] = $dir;
+            if ($empty) {
+                $files[] = $dir;
+            }
         }
         return $files;
     }

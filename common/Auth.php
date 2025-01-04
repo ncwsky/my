@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace common;
 
 //后台用户验证类
@@ -52,7 +54,7 @@ class Auth
      * @return bool
      * @throws \Exception
      */
-    public function chkPurview($control=null, $action=null, $get=null)
+    public function chkPurview($control = null, $action = null, $get = null)
     {
         $roleId = (int)session('adminRole');
         $row = $this->roleData($roleId);
@@ -60,7 +62,7 @@ class Auth
             return self::err('用户所属角色无效!');
         }
 
-        $control===null && cookie('adminRoleName', $row['name']); //角色名
+        $control === null && cookie('adminRoleName', $row['name']); //角色名
         $purview = json_decode($row['purview'], true);
         //组合配置的权限设置 角色.角色编号
         if (isset(\myphp::$cfg['role'][$row['id']])) {
@@ -74,7 +76,9 @@ class Auth
         if (isset($purview['isadmin'])) {
             return true;
         }
-        if ($control === null) $control = strtolower(\myphp::$env['c']);    //获得控制器名
+        if ($control === null) { //获得控制器名
+            $control = strtolower(\myphp::$env['c']);
+        }
         if (!isset($purview[$control])) {
             return self::err('用户所属角色没有' . $control . '的权限!');
         }
@@ -99,11 +103,15 @@ class Auth
         if ($purview[$control][$action] !== 1) { // hy=1 或 hy-1
             $para = strtr($purview[$control][$action], '-', '=');
             if (strpos($para, '=')) {
-                list($_k, $_v) = explode('=', $para);
+                [$_k, $_v] = explode('=', $para);
                 if ($get === null) {
-                    if (isset($_GET[$_k]) && $_GET[$_k] == $_v) return true;
+                    if (isset($_GET[$_k]) && $_GET[$_k] == $_v) {
+                        return true;
+                    }
                 } else {
-                    if (isset($get[$_k]) && $get[$_k] == $_v) return true;
+                    if (isset($get[$_k]) && $get[$_k] == $_v) {
+                        return true;
+                    }
                 }
             }
             return self::err($err);

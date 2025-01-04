@@ -1,8 +1,10 @@
 #!/usr/bin/env php
 <?php
+
+declare(strict_types=1);
 $_SERVER['SCRIPT_FILENAME'] = __FILE__; //重置运行
 
-define('APP_PATH',__DIR__.'/app');
+define('APP_PATH', __DIR__.'/app');
 define('COMMON', __DIR__.'/common');
 
 require __DIR__ . '/vendor/myphps/my-php-srv/Load.php';
@@ -49,8 +51,12 @@ $user = GetOpt::val('u', 'user');
 //cpu数量
 function cpu_num()
 {
-    if (function_exists('swoole_cpu_num')) return swoole_cpu_num();
-    if (DIRECTORY_SEPARATOR === '\\') return 1; //win
+    if (function_exists('swoole_cpu_num')) {
+        return swoole_cpu_num();
+    }
+    if (DIRECTORY_SEPARATOR === '\\') { //win
+        return 1;
+    }
     $num = 4;
     if (is_callable('shell_exec')) {
         if (strtolower(PHP_OS) === 'darwin') {
@@ -90,11 +96,21 @@ $config['setting']['pidFile'] = APP_RUN_DIR . '/app.pid';
 $config['setting']['logFile'] = APP_RUN_DIR . '/log/app.log'; //日志文件
 
 //指定运行参数
-if ($name) $config['name'] = $name;
-if ($listen > 0) $config['ip'] = $listen;
-if ($port > 0) $config['port'] = $port;
-if ($count > 0) $config['setting']['count'] = $count;
-if ($user) $config['setting']['user'] = $user;
+if ($name) {
+    $config['name'] = $name;
+}
+if ($listen > 0) {
+    $config['ip'] = $listen;
+}
+if ($port > 0) {
+    $config['port'] = $port;
+}
+if ($count > 0) {
+    $config['setting']['count'] = $count;
+}
+if ($user) {
+    $config['setting']['user'] = $user;
+}
 
 if ($isSwoole) {
     $srv = $config['type'] == 'http' ? new SwooleHttpSrv($config) : new SwooleSrv($config);

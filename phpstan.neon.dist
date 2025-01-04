@@ -1,0 +1,17 @@
+parameters:
+    level: 5
+    treatPhpDocTypesAsCertain: false
+    paths:
+        - .
+    bootstrapFiles:
+        - vendor/myphps/myphp/base.php
+    excludePaths:
+        - vendor
+        - dist
+        - app.php
+        - cmd.php
+    ignoreErrors:
+        - '#lib_redis#'
+        - '#EasyWeChat#'
+        - '#JWT#'
+        - '#(PHPExcel|Spout|Admin)#'

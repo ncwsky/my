@@ -10,14 +10,20 @@ class Rsa
     private $publicKey;
     private $keyLen;
 
+    /**
+     * @param string $privateKey 私钥文件或私钥内容
+     * @param string $publicKey 公钥文件或公钥内容
+     */
     public function __construct(string $privateKey, string $publicKey)
     {
         $this->privateKey = $this->_getContents($privateKey);
         $this->publicKey = $this->_getContents($publicKey);
 
         $publicKey = $this->_getPublicKey();
-        $this->keyLen = openssl_pkey_get_details($publicKey)["bits"];
-        openssl_free_key($publicKey);
+        if ($publicKey) {
+            $details = openssl_pkey_get_details($publicKey);
+            $this->keyLen = $details ? $details["bits"] : 0;
+        }
     }
 
     /**
@@ -34,8 +40,8 @@ class Rsa
     }
 
     /**
-     * @uses 获取私钥
-     * @return false|resource
+     * 获取私钥
+     * @return \OpenSSLAsymmetricKey|false
      */
     private function _getPrivateKey()
     {
@@ -43,8 +49,8 @@ class Rsa
     }
 
     /**
-     * @uses 获取公钥
-     * @return false|resource
+     * 获取公钥
+     * @return \OpenSSLAsymmetricKey|false
      */
     private function _getPublicKey()
     {
@@ -58,9 +64,6 @@ class Rsa
      */
     public function privateEncrypt(string $data = ''): string
     {
-        if (!is_string($data)) {
-            return '';
-        }
         $encrypted = '';
         $tmpEncrypted = '';
         $partLen = $this->keyLen / 8 - 11;
@@ -77,13 +80,10 @@ class Rsa
     /**
      * 公钥加密
      * @param string $data
-     * @return null|string
+     * @return string
      */
     public function publicEncrypt(string $data = ''): string
     {
-        if (!is_string($data)) {
-            return '';
-        }
         $encrypted = '';
         $tmpEncrypted = '';
         $partLen = $this->keyLen / 8 - 11;
@@ -104,9 +104,6 @@ class Rsa
      */
     public function privateDecrypt(string $encrypted = ''): string
     {
-        if (!is_string($encrypted)) {
-            return '';
-        }
         $decrypted = '';
         $tmpDecrypted = '';
         $privateKey = $this->_getPrivateKey();
@@ -129,9 +126,6 @@ class Rsa
      */
     public function publicDecrypt(string $encrypted = ''): string
     {
-        if (!is_string($encrypted)) {
-            return '';
-        }
         $decrypted = "";
         $tmpDecrypted = "";
         $publicKey = $this->_getPublicKey();

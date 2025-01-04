@@ -14,7 +14,7 @@ class UserAuth extends BaseAuth
     public $uid = 0;
 
     //检测用户是否登陆
-    public function isLogin()
+    public function isLogin(): bool
     {
         $auth = '';
         if (isset($_SERVER['HTTP_AUTHORIZATION'])) {

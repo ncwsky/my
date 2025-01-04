@@ -39,7 +39,7 @@ function cLog(string $name = 'clog')
 /**
  * 重试失败IP限制
  * @param string $name 标识
- * @param bool $record 是否记录错误次数
+ * @param bool|null $record 是否记录错误次数
  * @param string $errMsg 错误内容
  * @param int $allowTimes
  * @param int $limitMinute
@@ -54,7 +54,7 @@ retryErrLimitIp('标识', true, $errMsg);
 //清除错误次数
 retryErrLimitIp('标识', null);
  */
-function retryErrLimitIp(string $name, bool $record = true, string &$errMsg = '', int $allowTimes = 6, int $limitMinute = 10): bool
+function retryErrLimitIp(string $name, ?bool $record = true, string &$errMsg = '', int $allowTimes = 6, int $limitMinute = 10): bool
 {
     //登陆限制 通过ip
     $ip = \myphp\Helper::getIp();
@@ -129,7 +129,7 @@ function queueCli(string $func, $params = null, int $time = 0)
  * 生成密码散列值 60个字符
  * @param string $val
  * @param int $cost 建议 10-13 过大会执行过慢
- * @return false|string|null
+ * @return string
  */
 function pwd(string $val, int $cost = 10)
 {
@@ -546,7 +546,7 @@ function inLanIp(string $domain, string $lan = '192.168.0.'): bool
 /**
  * 过滤表情符
  * @param string $str
- * @return false|string|string[]|void|null
+ * @return string|null
  */
 function filterEmoji(string $str)
 {

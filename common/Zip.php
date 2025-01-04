@@ -25,7 +25,7 @@ class Zip
      */
     protected $zip = null;
 
-    public function __construct(string $outputName, int $level = self::DEF_COMPRESS, bool $sendHttpHeaders = false)
+    public function __construct(string $outputName, int $level = self::DEF_COMPRESS)
     {
         ini_set('memory_limit', '1024M');
         $dir = dirname($outputName);

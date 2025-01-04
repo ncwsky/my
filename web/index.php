@@ -1,6 +1,5 @@
 <?php
 
-declare(strict_types=1);
 define('APP_PATH', __DIR__.'/../app');
 define('COMMON', __DIR__.'/../common');
 require __DIR__ . "/../vendor/autoload.php";

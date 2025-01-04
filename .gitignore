@@ -15,3 +15,4 @@
 /gitpull.sh
 /web/yx_git.php
 /app.conf.local.php
+/.php-cs-fixer.cache

@@ -14,7 +14,7 @@ class OutExcel
 
     public static $csv = false;
     public static $pFilename = 'php://output';
-    public static function disToName($name)
+    public static function disToName(string $name): string
     {
         $name = str_replace(['\\','/',':','*','?','"','<','>','|'], '', $name);
         $utfName = rawurlencode(str_replace(['%'], '', $name));
@@ -30,10 +30,10 @@ class OutExcel
      * @param string $title
      * @param array $data
      * @param array $headers
-     * @param null|\Closure $eachFun
+     * @param \Closure|null $eachFun
      * @param bool $isOver 是否写入结束 默认是
      */
-    public static function putCsv($title, $data, $headers, $eachFun = null, $isOver = true)
+    public static function putCsv(string $title, array $data, array $headers, \Closure $eachFun = null, bool $isOver = true)
     {
         static $fp;
         $io_out = self::$pFilename == 'php://output';
@@ -91,12 +91,12 @@ class OutExcel
      * @param string $title
      * @param array $data
      * @param array $headers
-     * @param null $eachFun
+     * @param \Closure|null $eachFun
      * @param bool $isOver
      * @throws \Box\Spout\Common\Exception\IOException
      * @throws \Box\Spout\Writer\Exception\WriterNotOpenedException
      */
-    public static function putSpout($title, $data, $headers, $eachFun = null, $isOver = true)
+    public static function putSpout(string $title, array $data, array $headers, \Closure $eachFun = null, bool $isOver = true)
     {
         static $writer;
         $io_out = self::$pFilename == 'php://output';
@@ -173,8 +173,8 @@ class OutExcel
      * @param string $title
      * @param array $data
      * @param array $headers 头与数组关联
-     * @param null|\Closure $eachFun 单独对每行数据处理
-     * @param null|\Closure $headFun 格式头处理 func($sheetAct, $phpExcel) use($headerKey)
+     * @param \Closure|null $eachFun 单独对每行数据处理
+     * @param \Closure|null $headFun 格式头处理 func($sheetAct, $phpExcel) use($headerKey)
      *  $headerKey = [
             'A1' => ['name' => '日期', 'merge' => 'A1:A2'],
             'B1' => ['name' => '星期', 'merge' => 'B1:B2'],
@@ -184,7 +184,7 @@ class OutExcel
      * @throws \PHPExcel_Reader_Exception
      * @throws \PHPExcel_Writer_Exception
      */
-    public static function put($title, $data, $headers, $eachFun = null, $headFun = null, $rowIndex = 2)
+    public static function put(string $title, array $data, array $headers, \Closure $eachFun = null, \Closure $headFun = null, int $rowIndex = 2)
     {
         if (self::$csv) {
             self::$csv = false;
@@ -230,7 +230,7 @@ class OutExcel
         self::$pFilename = 'php://output'; //重置
     }
     // 设置表头
-    public static function setHeader($sheetAct, &$headers, $headN = 1)
+    public static function setHeader(\PHPExcel_Worksheet $sheetAct, array &$headers, int $headN = 1)
     {
         if (isset($headers[0])) { #普通数组 自动生成列名
             $_headers = [];
@@ -266,7 +266,7 @@ class OutExcel
             $PHPExcel_Style->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT)->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
         }
     }
-    public static function setData(\PHPExcel_Worksheet $sheetAct, $headers, $data, &$rowIndex = 2, $eachFun = null)
+    public static function setData(\PHPExcel_Worksheet $sheetAct, array $headers, array $data, int &$rowIndex = 2, $eachFun = null)
     {
         //输出行记录
         foreach ($data as $item) {
@@ -306,7 +306,7 @@ class OutExcel
      * @param int $index
      * @return string
      */
-    public static function getPrefix($index)
+    public static function getPrefix(int $index): string
     {
         $prefix = '';
         $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -328,12 +328,12 @@ class OutExcel
 
     public const EXPIRE = 7200; //下载及缓存有效期
     #是否有导出或生成下载列表
-    public static function hasExportList($uid, $cmd)
+    public static function hasExportList($uid, string $cmd): bool
     {
-        return redis()->keys($cmd.':'.$uid.':*') ? true : false;
+        return (bool)redis()->keys($cmd . ':' . $uid . ':*');
     }
     #获取指定导出的生成列表
-    public static function toExportList($uid, $cmd)
+    public static function toExportList($uid, string $cmd): array
     {
         $keys = redis()->keys($cmd.':'.$uid.':*');
         $list = [];
@@ -344,8 +344,15 @@ class OutExcel
         }
         return $list;
     }
-    #设置导出的生成状态
-    public static function toExportStatusOk($uid, $cmd, $params)
+
+    /**
+     * 设置导出的生成状态
+     * @param int|string $uid
+     * @param string $cmd
+     * @param array $params
+     * @return bool
+     */
+    public static function toExportStatusOk($uid, string $cmd, array $params): bool
     {
         $name = md5(toJson($params));
         $key = $cmd . ':' . $uid . ':' . $name;
@@ -359,7 +366,14 @@ class OutExcel
         return true;
     }
 
-    public static function realExportFile($uid, $params, $csv = null, $prefixName = '')
+    /**
+     * @param int|string $uid
+     * @param array $params
+     * @param bool|null $csv
+     * @param string $prefixName
+     * @return string
+     */
+    public static function realExportFile($uid, array $params, bool $csv = null, string $prefixName = ''): string
     {
         $name = md5(toJson($params));
         $dir = SITE_WEB . '/up/export';
@@ -373,7 +387,15 @@ class OutExcel
         return $dir . '/' . $prefixName.$name . $suffix;
     }
 
-    public static function toExport($uid, $cmd, $params, $csv = null, $prefixName = '')
+    /**
+     * @param int|string $uid
+     * @param string $cmd
+     * @param array $params
+     * @param bool|null $csv
+     * @param string $prefixName
+     * @return bool
+     */
+    public static function toExport($uid, string $cmd, array $params, bool $csv = null, string $prefixName = ''): bool
     {
         if ($csv === null) {
             $csv = self::$csv;
@@ -405,7 +427,7 @@ class OutExcel
         return true;
     }
 
-    public static function toExportClean()
+    public static function toExportClean(): string
     {
         $dirs = [
             SITE_WEB.'/up/export'

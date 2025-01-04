@@ -25,7 +25,7 @@ class Zip
      */
     protected $zip = null;
 
-    public function __construct($outputName, $level = self::DEF_COMPRESS, $sendHttpHeaders = false)
+    public function __construct(string $outputName, int $level = self::DEF_COMPRESS, bool $sendHttpHeaders = false)
     {
         ini_set('memory_limit', '1024M');
         $dir = dirname($outputName);
@@ -36,14 +36,14 @@ class Zip
         $this->level = $level;
     }
 
-    public function finish()
+    public function finish(): bool
     {
-        $ctrldir = implode('', $this->ctrl_dir);
-        $out = $ctrldir .
+        $ctrlDir = implode('', $this->ctrl_dir);
+        $out = $ctrlDir .
             self::EOF_CTRL_DIR .
             pack('v', count($this->ctrl_dir)) .
             pack('v', count($this->ctrl_dir)) .
-            pack('V', strlen($ctrldir)) .
+            pack('V', strlen($ctrlDir)) .
             pack('V', $this->dataSize) .
             "\x00\x00";
 
@@ -53,14 +53,14 @@ class Zip
 
     /**
      * @param string $fileName 不带/前缀的相对地址
-     * @param $data
+     * @param string $data
      */
-    public function addFile($fileName, $data)
+    public function addFile(string $fileName, string $data)
     {
         $this->_addFile($data, $fileName);
     }
 
-    public function addFileFromPath($fileName, $path)
+    public function addFileFromPath(string $fileName, string $path)
     {
         $data = file_get_contents($path);
         $data !== false && $this->_addFile($data, $fileName);
@@ -71,7 +71,7 @@ class Zip
      * @param string $dirName
      * @throws \Exception
      */
-    public function addPath($path, $dirName = '')
+    public function addPath(string $path, string $dirName = '')
     {
         if (!function_exists('gzcompress')) {
             return;
@@ -105,7 +105,7 @@ class Zip
         }
     }
 
-    private function _getFileList($dir)
+    private function _getFileList(string $dir): array
     {
         $files = [];
         if (file_exists($dir)) {
@@ -132,7 +132,7 @@ class Zip
         return $files;
     }
 
-    private function _unix2DosTime($time = 0)
+    private function _unix2DosTime(int $time = 0): int
     {
         $timearray = ($time == 0) ? getdate() : getdate($time);
         if ($timearray['year'] < 1980) {
@@ -147,7 +147,7 @@ class Zip
             ($timearray['hours'] << 11) | ($timearray['minutes'] << 5) | ($timearray['seconds'] >> 1);
     }
 
-    private function _addFile($data, $name, $time = 0)
+    private function _addFile(string $data, string $name, int $time = 0)
     {
         $name = str_replace('\\', '/', $name);
 

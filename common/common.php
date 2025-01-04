@@ -5,7 +5,7 @@ declare(strict_types=1);
  * @param string $name
  * @return lib_redis
  */
-function redis($name = 'redis')
+function redis(string $name = 'redis')
 {
     return myphp::redis($name);
 }
@@ -27,7 +27,7 @@ function getCache()
 }
 
 //循环日期记录
-function cLog($name = 'clog')
+function cLog(string $name = 'clog')
 {
     static $log;
     if (!isset($log[$name])) {
@@ -54,7 +54,7 @@ retryErrLimitIp('标识', true, $errMsg);
 //清除错误次数
 retryErrLimitIp('标识', null);
  */
-function retryErrLimitIp($name, $record = true, &$errMsg = '', $allowTimes = 6, $limitMinute = 10)
+function retryErrLimitIp(string $name, bool $record = true, string &$errMsg = '', int $allowTimes = 6, int $limitMinute = 10): bool
 {
     //登陆限制 通过ip
     $ip = \myphp\Helper::getIp();
@@ -81,12 +81,12 @@ function retryErrLimitIp($name, $record = true, &$errMsg = '', $allowTimes = 6, 
 }
 /**
  * url组装
- * @param $name
- * @param $url
+ * @param string $name
+ * @param string $url
  * @param array $params
  * @return string
  */
-function buildUrl($name, $url, $params = [])
+function buildUrl(string $name, string $url, array $params = []): string
 {
     $url = GetC('domain.'.$name) . '/' . ltrim($url, '/');
     if ($params) {
@@ -95,12 +95,12 @@ function buildUrl($name, $url, $params = [])
     return $url;
 }
 
-function apiUrl($url, $params = [])
+function apiUrl(string $url, array $params = []): string
 {
     return buildUrl('api', $url, $params);
 }
 
-function adminUrl($url, $params = [])
+function adminUrl(string $url, array $params = []): string
 {
     return buildUrl('admin', $url, $params);
 }
@@ -115,7 +115,7 @@ function toLog($msg, $tag = 'info')
  * @param array|string|null $params 参数，使用空格分隔
  * @param int $time 延时指定执行时间
  */
-function queueCli($func, $params = null, $time = 0)
+function queueCli(string $func, $params = null, int $time = 0)
 {
     $data = toJson([$func, $params]);
     if ($time > time()) {
@@ -127,11 +127,11 @@ function queueCli($func, $params = null, $time = 0)
 
 /**
  * 生成密码散列值 60个字符
- * @param $val
+ * @param string $val
  * @param int $cost 建议 10-13 过大会执行过慢
  * @return false|string|null
  */
-function pwd($val, $cost = 10)
+function pwd(string $val, int $cost = 10)
 {
     $options = [
         'cost' => $cost,
@@ -140,21 +140,21 @@ function pwd($val, $cost = 10)
 }
 
 //生成订单号
-function orderSN($prefix = 0, $s = '1')
+function orderSN(int $prefix = 0, string $s = '1'): string
 {
     //$chars = substr(microtime(),2,6);
-    $sn = date('ymdHis'). str_pad(rand(0, 99), 2, '0', STR_PAD_LEFT) .substr(microtime(), 2, 4); //18位
-    return $s . str_pad($prefix, 5, '0', STR_PAD_LEFT) . $sn; //24位
+    $sn = date('ymdHis'). str_pad((string)rand(0, 99), 2, '0', STR_PAD_LEFT) .substr(microtime(), 2, 4); //18位
+    return $s . str_pad((string)$prefix, 5, '0', STR_PAD_LEFT) . $sn; //24位
 }
 
 /**
  * 计算年龄
  * @param string $birth
- * @param null|DateTime $now
+ * @param DateTime|null $now
  * @return int
  * @throws Exception
  */
-function getAge($birth, $now = null)
+function getAge(string $birth, DateTime $now = null): int
 {
     if ($now === null) {
         $now = new \DateTime();
@@ -207,14 +207,14 @@ function getArea($code)
 }
 
 /**
- * @param $video
- * @param $img
+ * @param string $video
+ * @param string $img
  * @param int $offset 起始位置 秒
  * @param int $q 质量 越低越好  JPEG的有效范围是2-31
  * @param string $size 输出大小 min(600\,iw):-1 最大宽度600高等比
  * @return bool
  */
-function video2img($video, $img, $offset = -1, $q = 5, $size = '')
+function video2img(string $video, string $img, int $offset = -1, int $q = 5, string $size = ''): bool
 {
     if ($offset == -1) {
         $offset = mt_rand(0, 10);
@@ -256,29 +256,29 @@ function video2img($video, $img, $offset = -1, $q = 5, $size = '')
 
 /**
  * 按id以1000为基准生成目录
- * @param $id
+ * @param int $id
  * @param string $dir 指定后缀目录
  * @param int $base
  * @return string
  */
-function idDir($id, $dir = '', $base = 1000)
+function idDir(int $id, string $dir = '', int $base = 1000): string
 {
     return intval($id / $base) . '/' . $id . '/' . ($dir != '' ? trim($dir, '/') . '/' : '');
 }
 /**
  * 按id以1000为基准生成目录
- * @param $id
+ * @param int $id
  * @param string $dir 指定后缀目录
  * @param int $base
  * @return string
  */
-function avgDir($id, $dir = '', $base = 1000)
+function avgDir(int $id, string $dir = '', int $base = 1000): string
 {
     return strval($id % $base) . '/' . strval($id) . '/' . ($dir !== '' ? trim($dir, '/') . '/' : '');
 }
 
 //是否支付宝
-function isAlipay()
+function isAlipay(): bool
 {
     if (isset($_SERVER['HTTP_USER_AGENT']) && strpos($_SERVER['HTTP_USER_AGENT'], 'Alipay') !== false) {
         return true;
@@ -286,42 +286,20 @@ function isAlipay()
     return false;
 }
 //加锁 解锁 主要用于保证并发时操作的原子性 会阻塞
-function redisLock($lockKey, $lockTimeout = 10)
+function redisLock(string $lockKey, int $lockTimeout = 10)
 {
-    if ($lockTimeout == 0) { //释放锁
-        return redis()->del($lockKey);
-    }
-    do {
-        $num = redis()->incr($lockKey);
-        if ($num == 1) {
-            redis()->expire($lockKey, $lockTimeout); //获得锁 加过期时间 防止意外终止锁不释放
-            #sleep(5);
-        } else {
-            #echo 'waiting...'.microtime(),PHP_EOL;
-            usleep(100000); //睡眠，降低抢锁频率，缓解redis压力，针对问题2
-        }
-    } while ($num > 1);
-    return true;
+    return redis()->lockBlock($lockKey, $lockTimeout);
 }
 //加锁 解锁 主要用于判断是否重复操作
-function redisLockOnce($lockKey, $lockTimeout = 10, $redis = null)
+function redisLockOnce(string $lockKey, int $lockTimeout = 10, lib_redis $redis = null): bool
 {
     if (!$redis) {
         $redis = redis();
     }
-    if ($lockTimeout == 0) { //释放锁
-        return $redis->del($lockKey);
-    }
-    $num = $redis->incr($lockKey);
-    if ($num == 1) {
-        $redis->expire($lockKey, $lockTimeout); //获得锁 加过期时间 防止意外终止锁不释放
-        return true;
-    } else {
-        return false;
-    }
+    return $redis->lockOnce($lockKey, $lockTimeout);
 }
 //加锁带回调处理逻辑 会阻塞
-function redisLockCall($lockKey, $lockVal, $callback = null, $lockTimeout = 10)
+function redisLockCall(string $lockKey, $lockVal, \Closure $callback = null, int $lockTimeout = 10)
 {
     $ret = null;
     do {  //针对问题1，使用循环
@@ -345,10 +323,10 @@ function redisLockCall($lockKey, $lockVal, $callback = null, $lockTimeout = 10)
 }
 /**
  * 消息id 用于重复处理限制
- * @param $key
+ * @param string $key
  * @return int
  */
-function msgId($key = '')
+function msgId(string $key = ''): int
 {
     if ($key == '') {
         $key = '_kh_msg_id';
@@ -361,7 +339,7 @@ function msgId($key = '')
 }
 
 //对外接口通用签名 对所有待签名参数按照字段名的ASCII 码从小到大排序（字典序）后，使用 URL 键值对的格式（即key1=value1&key2=value2…）拼接成字符串string1
-function openSign($key, $name = 'sign')
+function openSign(string $key, string $name = 'sign'): bool
 {
     $data = \myphp\Helper::isPost() ? $_POST : $_GET;
     if (!isset($data[$name])) {
@@ -378,7 +356,7 @@ function openSign($key, $name = 'sign')
 }
 
 //对外接口通用签名
-function getSign($key, $data = [], $name = 'sign')
+function getSign(string $key, array $data = [], string $name = 'sign'): string
 {
     unset($data[$name]);
     ksort($data); //键名升序
@@ -400,7 +378,7 @@ function getSign($key, $data = [], $name = 'sign')
  * @param bool $isTmp 是不是临时文件
  * @return string
  */
-function tmp2file($uid, $pic, $dir = '', &$isTmp = false)
+function tmp2file(int $uid, string $pic, string $dir = '', bool &$isTmp = false): string
 {
     $isTmp = false;
     if (strpos($pic, '/tmp/') !== false) { //临时文件 移动
@@ -432,7 +410,7 @@ function tmp2file($uid, $pic, $dir = '', &$isTmp = false)
  * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
  * @throws \EasyWeChat\Kernel\Exceptions\RuntimeException
  */
-function miniQrCode($path, $scene, $val = '', $qrFile = '', $cfgName = 'wx_mini')
+function miniQrCode(string $path, string $scene, string $val = '', string $qrFile = '', string $cfgName = 'wx_mini')
 {
     if (!$scene || preg_match("/[^\w!#$&'()*+,\/:;=?@\-._~]/", $scene)) {
         return \myphp::err('参数为空或格式无效');
@@ -470,7 +448,7 @@ function miniQrCode($path, $scene, $val = '', $qrFile = '', $cfgName = 'wx_mini'
 }
 
 // 跳转提示信息输出: ([0,1]:)信息标题, url, 辅助信息, 等待时间（秒） 用于前端自动定义信息输出模板
-function outMsg($msg, $url = '', $info = '', $time = 1)
+function outMsg(string $msg, string $url = '', string $info = '', int $time = 1)
 {
     $is_url = false;
     if ($url == '') {
@@ -530,21 +508,21 @@ function outMsg($msg, $url = '', $info = '', $time = 1)
 
 /**
  * 解析域名获取ip
- * @param $domain
+ * @param string $domain
  * @return mixed|string
  */
-function dns2ip($domain)
+function dns2ip(string $domain)
 {
     return dns_get_record($domain, DNS_A)[0]['ip'] ?? '';
 }
 
 /**
  * 限定指定外网ip或是内网ip判定
- * @param $domain
+ * @param string $domain
  * @param string $lan
  * @return bool
  */
-function inLanIp($domain, $lan = '192.168.0.')
+function inLanIp(string $domain, string $lan = '192.168.0.'): bool
 {
     $ip = dns2ip($domain);
     $remoteIp = '0.0.0.1';
@@ -567,10 +545,10 @@ function inLanIp($domain, $lan = '192.168.0.')
 
 /**
  * 过滤表情符
- * @param $str
+ * @param string $str
  * @return false|string|string[]|void|null
  */
-function filterEmoji($str)
+function filterEmoji(string $str)
 {
     return preg_replace_callback('/./u', function ($match) {return strlen($match[0]) >= 4 ? '' : $match[0];}, $str);
 }
@@ -579,7 +557,7 @@ function filterEmoji($str)
  * @param string $flag 标识名
  * @return mixed
  */
-function runtime($start = 0, $flag = '')
+function runtime(int $start = 0, string $flag = '')
 {
     static $flags, $time;
     if ($start) {
@@ -614,7 +592,7 @@ function runtime($start = 0, $flag = '')
  * @param int $start 非0耗时起始 0计算耗时
  * @return int|string
  */
-function costTime($start = 0)
+function costTime(int $start = 0)
 {
     static $time;
     if ($start) {

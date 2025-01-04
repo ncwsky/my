@@ -65,7 +65,7 @@ function cliRun($a, $params)
  * @param string $dbName
  * @throws Exception
  */
-function cliModel($table = '1', $namespace = 'common\model', $baseName = '\myphp\Model', $dbName = 'db')
+function cliModel(string $table = '1', string $namespace = 'common\model', string $baseName = '\myphp\Model', string $dbName = 'db')
 {
     if ($table != '1') {
         $tables = strpos($table, ',') ? explode(',', $table) : [$table];
@@ -87,10 +87,10 @@ function cliModel($table = '1', $namespace = 'common\model', $baseName = '\myphp
  * 生成phar文件 仅用于常驻内存模式下运行
  * php cli.php phar
  * php -d phar.readonly=0 cli.php phar   使用 -d 参数来临时修改 phar.readonly 设置
- * @param int $sigName
+ * @param string $sigName
  * @param string $private_key_file
  */
-function cliPhar($sigName = 'sha256', $private_key_file = '')
+function cliPhar(string $sigName = 'sha256', string $private_key_file = '')
 {
     if (!is_dir(__DIR__ . '/dist/web')) {
         mkdir(__DIR__ . '/dist/web', 0755, true);
@@ -195,7 +195,7 @@ require 'phar://../my.phar/web/index.php';");
  * php cli.php Queue
  * @param int $size
  */
-function cliQueue($size = 100)
+function cliQueue(int $size = 100)
 {
     $run = (int)redis()->get('__queue_run');
     if ($run >= 10) {

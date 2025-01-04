@@ -16,7 +16,7 @@ use PhpCsFixer\Finder;
 
 $finder = Finder::create()->in(__DIR__)
     ->exclude(['vendor','tpl']) // 排除 vendor 目录
-    ->notPath(['app/config.php','conf.php','web/index.php'])
+    ->notPath(['app/config.php','conf.php','web/index.php','web/yx_git.php'])
     ->name('*.php');
     //->exclude('def_config.php')
     //->notName(['*config.php']);

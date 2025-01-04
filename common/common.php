@@ -40,7 +40,7 @@ function cLog(string $name = 'clog')
  * 重试失败IP限制
  * @param string $name 标识
  * @param bool|null $record 是否记录错误次数
- * @param string $errMsg 错误内容
+ * @param string|null $errMsg 错误内容
  * @param int $allowTimes
  * @param int $limitMinute
  * @return bool
@@ -54,7 +54,7 @@ retryErrLimitIp('标识', true, $errMsg);
 //清除错误次数
 retryErrLimitIp('标识', null);
  */
-function retryErrLimitIp(string $name, ?bool $record = true, string &$errMsg = '', int $allowTimes = 6, int $limitMinute = 10): bool
+function retryErrLimitIp(string $name, ?bool $record = true, ?string &$errMsg = '', int $allowTimes = 6, int $limitMinute = 10): bool
 {
     //登陆限制 通过ip
     $ip = \myphp\Helper::getIp();
@@ -66,7 +66,7 @@ function retryErrLimitIp(string $name, ?bool $record = true, string &$errMsg = '
         return true;
     }
     $errTimes = (int)redis()->get($retryLimitKey);
-    if (!$record) {
+    if ($record) {
         redis()->incr($retryLimitKey);
         redis()->expire($retryLimitKey, $limitMinute * 60);
         $errMsg = "还可以重试" . ($allowTimes - $errTimes - 1) . "次";

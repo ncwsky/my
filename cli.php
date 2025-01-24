@@ -58,7 +58,7 @@ function cliRun($a, $params)
 
 /**
  * 生成表model类
- * php cli.php Model 1 "common\model" "CommonModel"
+ * php cli.php Model 1 "common\model" "\common\CommonModel"
  * @param string $table
  * @param string $namespace
  * @param string $baseName

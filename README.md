@@ -7,7 +7,7 @@
 php my --run=应用目录名 --init 
 
 初始表Model  
-php cli.php Model 1 "common\model" "CommonModel"  
+php cli.php Model 1 "common\model" "\common\CommonModel" 
 
 常驻内存运行  
 php app.php  

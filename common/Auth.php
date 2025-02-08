@@ -128,7 +128,9 @@ class Auth
     public function adminCheck()
     {
         if (!$this->adminLogin()) {
-            $redirect = \myphp::$cfg['auth_gateway'];
+            //$redirect = U(\myphp::$cfg['auth_gateway']);
+            $redirect = strpos(\myphp::$cfg['auth_gateway'], 'http') === 0 ? \myphp::$cfg['auth_gateway'] : U(\myphp::$cfg['auth_gateway']);
+
             throw new \Exception(Helper::outMsg('你未登录,请先登录!', $redirect), 200);
         }
         if (!$this->chkPurview()) {

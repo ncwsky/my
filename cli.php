@@ -71,6 +71,19 @@ function cliModel(string $table = '1', string $namespace = 'common\model', strin
         $tables = strpos($table, ',') ? explode(',', $table) : [$table];
     } else {
         $tables = db($dbName)->getTables();
+        if (is_file(__DIR__ . '/.table-ignore')) { //全库生成表model时忽略表
+            if ($ignores = trim(file_get_contents(__DIR__ . '/.table-ignore'))) {
+                $ignores = explode("\n", $ignores);
+                $ignores = array_map(function ($v) {
+                    return trim($v);
+                }, $ignores);
+                foreach ($tables as $k => $name) {
+                    if (in_array($name, $ignores)) {
+                        unset($tables[$k]);
+                    }
+                }
+            }
+        }
     }
     foreach ($tables as $name) {
         $ret = \myphp\Tool::initModel($name, $namespace, $baseName, $dbName);

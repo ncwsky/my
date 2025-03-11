@@ -107,7 +107,7 @@ function adminUrl(string $url, array $params = []): string
 
 function toLog($msg, $tag = 'info')
 {
-    \myphp\Log::write($msg, $tag);
+    Log::write($msg, $tag);
 }
 
 /**
@@ -351,7 +351,7 @@ function openSign(string $key, string $name = 'sign'): bool
     if ($md5 == $sign) {
         return true;
     }
-    toLog(sprintf("%s+%s", http_build_query($data), $key) . ' == ' . $md5, 'openSign');
+    Log::write(sprintf("%s+%s", http_build_query($data), $key) . ' == ' . $md5, 'openSign');
     return false;
 }
 
@@ -373,8 +373,8 @@ function getSign(string $key, array $data = [], string $name = 'sign'): string
 /**
  * 临时上传文件转为正常上传文件
  * @param int $uid
- * @param string $dir
  * @param string $pic
+ * @param string $dir
  * @param bool $isTmp 是不是临时文件
  * @return string
  */
@@ -393,10 +393,35 @@ function tmp2file(int $uid, string $pic, string $dir = '', bool &$isTmp = false)
         }
         $new_pic = str_replace('/tmp/', $new_dir, $pic);
         $ret = rename($root . $pic, $root . $new_pic);
-        toLog(toJson($ret) . ' ' . $pic . ' -> ' . $new_pic, 'rename');
+        Log::write(toJson($ret) . ' ' . $pic . ' -> ' . $new_pic, 'rename');
         $pic = $new_pic;
     }
     return $pic;
+}
+/**
+ * 临时上传文件转为正常上传文件
+ * @param string $pic
+ * @param string $new_dir '/up/' . avgDir($uid, $dir)
+ * @param bool|null $isTmp 是不是临时文件
+ */
+function tmpToFile(string &$pic, string $new_dir, bool &$isTmp = null)
+{
+    $isTmp = false;
+    if (strpos($pic, '/tmp/') === false) return;
+    //临时文件 移动
+    $root = __DIR__ . '/../web';
+    $isTmp = true;
+    if (!file_exists($root . $pic)) { //文件不存在
+        $pic = '';
+        return;
+    }
+    if (!is_dir($root . $new_dir)) {
+        mkdir($root . $new_dir, 0755, true);
+    }
+    $new_pic = str_replace('/tmp/', $new_dir, $pic);
+    $ret = rename($root . $pic, $root . $new_pic);
+    Log::write(toJson($ret) . ' ' . $pic . ' -> ' . $new_pic, 'rename');
+    $pic = $new_pic;
 }
 
 /**
@@ -526,7 +551,7 @@ function inLanIp(string $domain, string $lan = '192.168.0.'): bool
 {
     $ip = dns2ip($domain);
     $remoteIp = '0.0.0.1';
-    //toLog($_SERVER, 'srv');
+    //Log::write($_SERVER, 'srv');
     if (isset($_SERVER['HTTP_ALI_CDN_REAL_IP'])) { #阿里cdn
         $remoteIp = $_SERVER['HTTP_ALI_CDN_REAL_IP'];
     } elseif (isset($_SERVER['HTTP_X_TENCENT_UA']) && isset($_SERVER['HTTP_X_FORWARDED_FOR'])) { //腾讯
@@ -539,7 +564,7 @@ function inLanIp(string $domain, string $lan = '192.168.0.'): bool
     if (strpos($remoteIp, $lan) === 0) {
         return true;
     } //内网
-    //toLog($ip.'---'.$remoteIp, 'ip');
+    //Log::write($ip.'---'.$remoteIp, 'ip');
     return $ip == $remoteIp;
 }
 

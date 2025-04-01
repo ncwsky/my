@@ -1,6 +1,9 @@
 <?php
 
 declare(strict_types=1);
+
+use myphp\Log;
+
 /**
  * @param string $name
  * @return lib_redis

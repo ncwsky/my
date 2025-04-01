@@ -370,7 +370,7 @@ function openSign(string $key, string $name = 'sign'): bool
     if ($md5 == $sign) {
         return true;
     }
-    toLog(sprintf("%s+%s", http_build_query($data), $key) . ' == ' . $md5, 'openSign');
+    toLog(sprintf("%s+%s -> md5:%s", http_build_query($data), $key, $md5) . ' != ' . $sign, 'openSign');
     return false;
 }
 
@@ -412,11 +412,12 @@ function tmp2file(int $uid, string $pic, string $dir = '', bool &$isTmp = false)
         }
         $new_pic = str_replace('/tmp/', $new_dir, $pic);
         $ret = rename($root . $pic, $root . $new_pic);
-        toLog(toJson($ret) . ' ' . $pic . ' -> ' . $new_pic, 'rename');
+        toLog('tmpUid2file rename ' . toJson($ret) . ' ' . $pic . ' -> ' . $new_pic);
         $pic = $new_pic;
     }
     return $pic;
 }
+
 /**
  * 临时上传文件转为正常上传文件
  * @param string $pic
@@ -439,7 +440,7 @@ function tmpToFile(string &$pic, string $new_dir, bool &$isTmp = null)
     }
     $new_pic = str_replace('/tmp/', $new_dir, $pic);
     $ret = rename($root . $pic, $root . $new_pic);
-    Log::write(toJson($ret) . ' ' . $pic . ' -> ' . $new_pic, 'rename');
+    toLog('tmpToFile rename ' . toJson($ret) . ' ' . $pic . ' -> ' . $new_pic);
     $pic = $new_pic;
 }
 

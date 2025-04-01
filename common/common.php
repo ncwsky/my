@@ -1,9 +1,6 @@
 <?php
 
 declare(strict_types=1);
-
-use myphp\Log;
-
 /**
  * @param string $name
  * @return lib_redis
@@ -110,7 +107,7 @@ function adminUrl(string $url, array $params = []): string
 
 function toLog($msg, $tag = 'info')
 {
-    Log::write($msg, $tag);
+    \myphp\Log::write($msg, $tag);
 }
 
 /**
@@ -288,6 +285,25 @@ function isAlipay(): bool
     }
     return false;
 }
+
+//10秒内限制5次请求限制
+function ipReqLimit($name, $num = 5, $sec = 10)
+{
+    if (isset($_SERVER['HTTP_ALI_CDN_REAL_IP'])) { #阿里cdn
+        $ip = $_SERVER['HTTP_ALI_CDN_REAL_IP'];
+    } elseif (isset($_SERVER['HTTP_X_TENCENT_UA']) && isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    } else {
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    }
+    if (!redisLockOnce($name . ':' . $ip, $sec)) {
+        $num = redis()->get($name . ':' . $ip);
+        if ($num > 5) {
+            return false;
+        }
+    }
+    return true;
+}
 //加锁 解锁 主要用于保证并发时操作的原子性 会阻塞
 function redisLock(string $lockKey, int $lockTimeout = 10)
 {
@@ -354,7 +370,7 @@ function openSign(string $key, string $name = 'sign'): bool
     if ($md5 == $sign) {
         return true;
     }
-    Log::write(sprintf("%s+%s", http_build_query($data), $key) . ' == ' . $md5, 'openSign');
+    toLog(sprintf("%s+%s", http_build_query($data), $key) . ' == ' . $md5, 'openSign');
     return false;
 }
 
@@ -396,7 +412,7 @@ function tmp2file(int $uid, string $pic, string $dir = '', bool &$isTmp = false)
         }
         $new_pic = str_replace('/tmp/', $new_dir, $pic);
         $ret = rename($root . $pic, $root . $new_pic);
-        Log::write(toJson($ret) . ' ' . $pic . ' -> ' . $new_pic, 'rename');
+        toLog(toJson($ret) . ' ' . $pic . ' -> ' . $new_pic, 'rename');
         $pic = $new_pic;
     }
     return $pic;
@@ -554,7 +570,7 @@ function inLanIp(string $domain, string $lan = '192.168.0.'): bool
 {
     $ip = dns2ip($domain);
     $remoteIp = '0.0.0.1';
-    //Log::write($_SERVER, 'srv');
+    //toLog($_SERVER, 'srv');
     if (isset($_SERVER['HTTP_ALI_CDN_REAL_IP'])) { #阿里cdn
         $remoteIp = $_SERVER['HTTP_ALI_CDN_REAL_IP'];
     } elseif (isset($_SERVER['HTTP_X_TENCENT_UA']) && isset($_SERVER['HTTP_X_FORWARDED_FOR'])) { //腾讯
@@ -567,7 +583,7 @@ function inLanIp(string $domain, string $lan = '192.168.0.'): bool
     if (strpos($remoteIp, $lan) === 0) {
         return true;
     } //内网
-    //Log::write($ip.'---'.$remoteIp, 'ip');
+    //toLog($ip.'---'.$remoteIp, 'ip');
     return $ip == $remoteIp;
 }
 

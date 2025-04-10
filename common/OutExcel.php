@@ -14,17 +14,6 @@ class OutExcel
 
     public static $csv = false;
     public static $pFilename = 'php://output';
-    public static function disToName(string $name): string
-    {
-        $name = str_replace(['\\','/',':','*','?','"','<','>','|'], '', $name);
-        $utfName = rawurlencode(str_replace(['%'], '', $name));
-
-        $disToHeader = "attachment; filename=\"{$name}\"";
-        if ($utfName !== $name) {
-            $disToHeader .= "; filename*=utf-8''{$utfName}";
-        }
-        return $disToHeader;
-    }
 
     /**
      * @param string $title
@@ -42,8 +31,7 @@ class OutExcel
             //header('Content-Disposition: ' . self::disToName($title . '.csv'));
             $res = \myphp::res();
             $first = $res->getHeaderLine('Content-Type') != 'text/csv; charset=utf-8';
-            $res->withHeader('Content-Type', 'text/csv; charset=utf-8')
-                ->withHeader('Content-Disposition', self::disToName($title . '.csv'));
+            $res->setDownloadHeaders($title . '.csv', 'text/csv; charset=utf-8');
 
             if (IS_CLI) {
                 $first && ob_start();
@@ -104,9 +92,8 @@ class OutExcel
             //header('Content-Type: text/csv; charset=utf-8');
             //header('Content-Disposition: ' . self::disToName($title . '.csv'));
             $res = \myphp::res();
-            $first = $res->getHeaderLine('Content-Type') != 'text/csv; charset=utf-8';
-            $res->withHeader('Content-Type', 'text/csv; charset=utf-8')
-                ->withHeader('Content-Disposition', self::disToName($title . '.xlsx'));
+            $first = $res->getHeaderLine('Content-Type') != 'application/octet-stream';
+            $res->setDownloadHeaders($title . '.xlsx');
 
             if (IS_CLI) {
                 $first && ob_start();
@@ -278,22 +265,30 @@ class OutExcel
                     $res = $value['key'] instanceof \Closure ? $value['key']($item) : $item[$value['key']] ?? '';
                     $dataType = $value['type'] ?? false;
                     if ($dataType && in_array($dataType, [
-                        \PHPExcel_Cell_DataType::TYPE_STRING2,
-                        \PHPExcel_Cell_DataType::TYPE_STRING,
-                        \PHPExcel_Cell_DataType::TYPE_FORMULA,
-                        \PHPExcel_Cell_DataType::TYPE_NUMERIC,
-                        \PHPExcel_Cell_DataType::TYPE_BOOL,
-                        \PHPExcel_Cell_DataType::TYPE_NULL,
-                        \PHPExcel_Cell_DataType::TYPE_INLINE,
-                        \PHPExcel_Cell_DataType::TYPE_ERROR,
-                    ])) { // 设置单元格类型
+                            \PHPExcel_Cell_DataType::TYPE_STRING2,
+                            \PHPExcel_Cell_DataType::TYPE_STRING,
+                            \PHPExcel_Cell_DataType::TYPE_FORMULA,
+                            \PHPExcel_Cell_DataType::TYPE_NUMERIC,
+                            \PHPExcel_Cell_DataType::TYPE_BOOL,
+                            \PHPExcel_Cell_DataType::TYPE_NULL,
+                            \PHPExcel_Cell_DataType::TYPE_INLINE,
+                            \PHPExcel_Cell_DataType::TYPE_ERROR,
+                        ])) { // 设置单元格类型
                         $sheetAct->setCellValueExplicit($key . $rowIndex, $res, $dataType);
                     } else {
-                        $sheetAct->setCellValue($key . $rowIndex, $res);
+                        $sheetAct->setCellValue($key . $rowIndex, (string)$res);
                     }
                 } else {
                     $sheetAct->setCellValue($key . $rowIndex, '');
                 }
+            }
+
+            // 是否需要合并
+            if ($merge = $item['merge'] ?? false) {
+                $sheetAct->mergeCells($merge);
+                $sheetAct->getStyle($merge)->getAlignment()
+                    ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER)
+                    ->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
             }
             $rowIndex++;
         }

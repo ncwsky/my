@@ -220,14 +220,14 @@ function cliQueue(int $size = 100)
     $n = 0;
     try {
         $time = time();
-        //延迟入列
-        $items = redis()->zrevrangebyscore('__queueZ', $time, '-inf');
+        //延迟入列  Redis::zRevRangeByScore() expects parameter 2 to be string, integer given
+        $items = redis()->zrevrangebyscore('__queueZ', (string)$time, '-inf');
         if ($items) {
             echo '延迟处理数:' . count($items), PHP_EOL;
             foreach ($items as $cmd) {
                 redis()->rpush('__queue', $cmd); //将值推入到尾部
             }
-            redis()->zremrangebyscore('__queueZ', '-inf', $time); //清除已处理的数据
+            redis()->zremrangebyscore('__queueZ', '-inf', (string)$time); //清除已处理的数据
         }
         //处理队列
         while ($data = redis()->lpop('__queue')) {

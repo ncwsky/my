@@ -5,7 +5,6 @@
 #执行队列任务
 #* * * * * cd pwd && /usr/bin/sh ./queue.sh Queue 2
 
-
 if [ -n "$2" ]; then
     step=$2
 else

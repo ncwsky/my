@@ -563,13 +563,21 @@ function dns2ip(string $domain)
 
 /**
  * 限定指定外网ip或是内网ip判定
- * @param string $domain
+ * @param string|\Closure $domain
  * @param string $lan
  * @return bool
  */
-function inLanIp(string $domain, string $lan = '192.168.0.'): bool
+function inLanIp($domain, string $lan = '192.168.0.'): bool
 {
-    $ip = dns2ip($domain);
+    if (is_string($domain)) {
+        $ip = dns2ip($domain);
+    } else {
+        $ip = $domain instanceof \Closure ? call_user_func($domain) : '0.0.0.0';
+    }
+    if (!empty($_SERVER['IS_CLI_RUN'])) { //是脚本执行不拦截
+        return true;
+    }
+
     $remoteIp = '0.0.0.1';
     //toLog($_SERVER, 'srv');
     if (isset($_SERVER['HTTP_ALI_CDN_REAL_IP'])) { #阿里cdn

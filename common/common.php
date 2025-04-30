@@ -312,6 +312,9 @@ function redisLock(string $lockKey, int $lockTimeout = 10)
 //加锁 解锁 主要用于判断是否重复操作
 function redisLockOnce(string $lockKey, int $lockTimeout = 10, lib_redis $redis = null): bool
 {
+    if (!GetC('redis')) { //兼容处理 未配置redis时使用文件锁定处理
+        return \myphp\Helper::fileLockOnce($lockKey, $lockTimeout);
+    }
     if (!$redis) {
         $redis = redis();
     }

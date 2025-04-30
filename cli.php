@@ -263,7 +263,7 @@ function cliQueue(int $size = 100)
 }
 
 /**
- * 每10分钟执行一次 清除临时图片
+ * 每10分钟执行一次 清除临时文件
  * php cli.php ClearTmp
  */
 function cliClearTmp()
@@ -276,4 +276,12 @@ function cliClearTmp()
     //$clearTmp->setDir(ROOT.'/tmp');
     //$clearTmp->clear(3600, true);
     echo SITE_WEB . '/tmp run end' . PHP_EOL;
+
+    //半小时执行一次导出清理
+    if (redisLockOnce('_exportClear', 1800)) {
+        echo ROOT . '/web/up/export run clear' . PHP_EOL;
+        \common\OutExcel::toExportClean();
+        echo ROOT . '/web/up/export run end' . PHP_EOL;
+    }
+    echo date('Y-m-d H:i:s') .' ClearTmp ok',PHP_EOL;
 }

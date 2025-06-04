@@ -44,7 +44,7 @@ if (GetOpt::has('h', 'help')) {
 }
 $listen = GetOpt::val('l', 'listen');
 $port = (int)GetOpt::val('p', 'port');
-$count = (int)GetOpt::val('n', 'count');
+$count = (int)GetOpt::val('c', 'count');
 $name = GetOpt::val('n', 'name');
 $user = GetOpt::val('u', 'user');
 

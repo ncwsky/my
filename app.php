@@ -7,8 +7,8 @@ $_SERVER['SCRIPT_FILENAME'] = __FILE__; //重置运行
 define('APP_PATH', __DIR__.'/app');
 define('COMMON', __DIR__.'/common');
 
-require __DIR__ . '/vendor/myphps/my-php-srv/Load.php';
-require __DIR__ . '/vendor/workerman/workerman/Autoloader.php';
+#require __DIR__ . '/vendor/myphps/my-php-srv/Load.php';
+require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/vendor/myphps/myphp/GetOpt.php';
 
 //解析命令参数

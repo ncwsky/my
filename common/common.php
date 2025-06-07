@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 /**
  * @param string $name
  * @return lib_redis
@@ -471,7 +472,7 @@ function miniQrCode(string $path, string $scene, string $val = '', string $qrFil
     $app = \EasyWeChat\Factory::miniProgram(GetC($cfgName));
     $env_version = $_GET['env_ver'] ?? ''; //指定版本  release, trial, develop
     $options = [
-        'page'  => $path,
+        'page' => $path,
         'width' => 220,
     ];
     if ($env_version) {
@@ -490,7 +491,7 @@ function miniQrCode(string $path, string $scene, string $val = '', string $qrFil
         }
     } else {
         toLog($response, 'qrFail');
-        return \myphp::err('小程序二维获取失败:'.$response['errmsg']);
+        return \myphp::err('小程序二维获取失败:' . $response['errmsg']);
     }
     return ['scene' => $scene, 'qr' => $qrFile, 'base64' => $base64];
 }

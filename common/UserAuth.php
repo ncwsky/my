@@ -11,10 +11,10 @@ class UserAuth extends BaseAuth
 {
     use \MyMsg;
 
-    public $uid = 0;
+    public static $uid = 0;
 
     //检测用户是否登陆
-    public function isLogin(): bool
+    public static function isLogin(): bool
     {
         $auth = '';
         if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
@@ -35,7 +35,7 @@ class UserAuth extends BaseAuth
 
         try {
             $jwt = \Firebase\JWT\JWT::decode($auth, new \Firebase\JWT\Key(GetC('jwt_key'), 'HS384'));
-            $this->uid = $jwt->uid;
+            self::$uid = $jwt->uid;
             //session('role', 'test');
         } catch (\Exception $e) {
             #throw new \Exception(toJson(\myphp\Control::fail('登录状态失效', 100)), 200);

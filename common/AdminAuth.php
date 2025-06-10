@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace common;
 
 //后台用户验证类
-use module\admin\model\Admin;
-use module\admin\model\Role;
+use admin\model\Admin;
+use admin\model\Role;
 use myphp\Helper;
 
 class AdminAuth extends \myphp\BaseAuth

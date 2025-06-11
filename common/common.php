@@ -406,10 +406,10 @@ function tmp2file(int $uid, string $pic, string $dir = '', bool &$isTmp = false)
     $isTmp = false;
     if (strpos($pic, '/tmp/') !== false) { //临时文件 移动
         $root = __DIR__ . '/../web';
-        $isTmp = true;
         if (!file_exists($root . $pic)) { //文件不存在
             return '';
         }
+        $isTmp = true;
         $new_dir = '/up/' . avgDir($uid, $dir);
         if (!is_dir($root . $new_dir)) {
             mkdir($root . $new_dir, 0755, true);
@@ -426,19 +426,19 @@ function tmp2file(int $uid, string $pic, string $dir = '', bool &$isTmp = false)
  * 临时上传文件转为正常上传文件
  * @param string $pic
  * @param string $new_dir '/up/' . avgDir($uid, $dir)
- * @param bool|null $isTmp 是不是临时文件
+ * @param bool $isTmp 是不是临时文件
  */
-function tmpToFile(string &$pic, string $new_dir, bool &$isTmp = null)
+function tmpToFile(string &$pic, string $new_dir, bool &$isTmp = false)
 {
     $isTmp = false;
     if (strpos($pic, '/tmp/') === false) return;
     //临时文件 移动
     $root = __DIR__ . '/../web';
-    $isTmp = true;
     if (!file_exists($root . $pic)) { //文件不存在
         $pic = '';
         return;
     }
+    $isTmp = true;
     if (!is_dir($root . $new_dir)) {
         mkdir($root . $new_dir, 0755, true);
     }

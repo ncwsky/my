@@ -49,8 +49,8 @@ class SmsAliCode
         #$params['SmsUpExtendCode'] = "1234567";
 
         // *** 需用户填写部分结束, 以下代码若无必要无需更改 ***
-        if(!empty($params["TemplateParam"]) && is_array($params["TemplateParam"])) {
-            $params["TemplateParam"] = json_encode($params["TemplateParam"], JSON_UNESCAPED_UNICODE);
+        if(!empty($params['TemplateParam']) && is_array($params['TemplateParam'])) {
+            $params['TemplateParam'] = json_encode($params['TemplateParam'], JSON_UNESCAPED_UNICODE);
         }
 
         // 此处可能会抛出异常，注意catch

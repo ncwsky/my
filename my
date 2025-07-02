@@ -1,7 +1,5 @@
 #!/usr/bin/env php
 <?php
-
-declare(strict_types=1);
 /**
  * cli模式下脚本执行入口
  * my --init 应用初始化

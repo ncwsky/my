@@ -7,9 +7,6 @@
     "homepage": "https://github.com/ncwsky/my",
     "minimum-stability": "dev",
     "require": {
-        "myphps/my-php-srv": "^3.0"
-    },
-    "require-dev": {
-        "phpstan/phpstan": "2.1.x-dev"
+        "myphps/my-php-srv": "^4.0"
     }
 }

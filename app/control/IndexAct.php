@@ -6,6 +6,7 @@ namespace app\control;
 
 class IndexAct extends Base
 {
+    use \common\TraitControl;
     //创建一个方法
     public function index()
     {

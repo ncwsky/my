@@ -25,7 +25,7 @@ class Weixin
      * @param string $name
      * @return \EasyWeChat\OfficialAccount\Application
      */
-    public static function getApp($name = self::WX_CFG)
+    public static function getApp(string $name = self::WX_CFG)
     {
         if (!isset(self::$app[$name])) {
             self::$app[$name] = Factory::officialAccount(GetC($name));
@@ -46,9 +46,8 @@ class Weixin
      * @param string $url
      * @param string $cfg
      * @return array|bool|\EasyWeChat\Kernel\Support\Collection|object|\Psr\Http\Message\ResponseInterface|string
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public static function pushCommon($openid, $template_id, $sendData, $url = '', $cfg = self::WX_CFG)
+    public static function pushCommon(string $openid, string $template_id, array $sendData, string $url = '', string $cfg = self::WX_CFG)
     {
         try {
             $app = static::getApp($cfg);
@@ -74,7 +73,7 @@ class Weixin
      * @param string $cfg
      * @return array|bool
      */
-    public static function qr($sceneVal, $time = 610, $cfg = self::WX_CFG)
+    public static function qr($sceneVal, int $time = 610, string $cfg = self::WX_CFG)
     {
         $app = static::getApp($cfg);
         try {
@@ -101,7 +100,7 @@ class Weixin
      * @param string $cfg
      * @return array|\EasyWeChat\Kernel\Support\Collection|object|\Psr\Http\Message\ResponseInterface|string
      */
-    public static function foreverQr($sceneVal, $cfg = self::WX_CFG)
+    public static function foreverQr($sceneVal, string $cfg = self::WX_CFG)
     {
         $app = static::getApp($cfg);
         try {

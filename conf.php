@@ -32,7 +32,7 @@ $cfg = [
         'select'=>2 //选择库 * /
     ],*/
     'log_dir' => __DIR__ . '/log', //日志记录主目录名称
-    'log_level' => 1, //日志级别 0-5
+    'log_level' => 0, //日志级别 0-5
     //'app_res_path'=>'http://www.test.com', //指定模板资源地址
     'domain' => [
         #'api'=>'http://www.test.com',

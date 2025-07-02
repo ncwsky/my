@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+
 //windows 测试使用
 while (true) {
     #echo shell_exec('php cli.php ClearTmp'), PHP_EOL;

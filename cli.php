@@ -160,6 +160,13 @@ require APP_RUN_DIR . '/conf.php';
 require MY_PHAR_PATH . '/vendor/myphps/myphp/base.php';
 myphp::Run();");
 
+    //验证码字体文件处理 /vendor/myphps/myphp/ext/Image.php
+    $image = str_replace('__DIR__ . \'/../inc/', 'APP_RUN_DIR . \'/inc/', file_get_contents(__DIR__ . '/vendor/myphps/myphp/ext/Image.php'));
+    $phar->addFromString('vendor/myphps/myphp/ext/Image.php', $image);
+    mkdir(__DIR__ . '/dist/inc', 0755, true);
+    //复制字体文件
+    copy(__DIR__ . '/vendor/myphps/myphp/inc/ggbi.ttf', __DIR__ . '/dist/inc/ggbi.ttf');
+
     echo '开始生成Phar',PHP_EOL;
     //在直接使用my.phar时直接执行app.php
     $phar->setStub("#!/usr/bin/env php
@@ -171,6 +178,7 @@ __HALT_COMPILER();
 
     $phar->stopBuffering();
     unset($phar);
+
     //复制配置文件
     copy(__DIR__ . '/app.conf.php', __DIR__ . '/dist/app.conf.php');
     copy(__DIR__ . '/conf.php', __DIR__ . '/dist/conf.php');

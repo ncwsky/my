@@ -241,7 +241,7 @@ function cliQueue(int $size = 100)
         while ($data = redis()->lpop('__queue')) {
             $n++;
             [$func, $params] = json_decode($data, true);
-            $start_time = microtime(true);
+            run_time(true);
             echo date("Y/m/d H:i:s").' start: ' . $data, PHP_EOL;
             if (function_exists($func)) {
                 cliRun($func, $params);
@@ -255,7 +255,7 @@ function cliQueue(int $size = 100)
                 $ret = shell_exec($cmd);
                 echo $cmd . ' : ', $ret, PHP_EOL;
             }
-            echo date("Y/m/d H:i:s").' end: '.run_time($start_time), PHP_EOL;
+            echo date("Y/m/d H:i:s").' end: '.run_time(), PHP_EOL;
 
             if ($n > $size) {
                 break;

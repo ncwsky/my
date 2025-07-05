@@ -597,7 +597,7 @@ function inLanIp($domain, string $lan = '192.168.0.'): bool
         return true;
     } //内网
     //toLog($ip.'---'.$remoteIp, 'ip');
-    return $ip == $remoteIp;
+    return in_array($remoteIp, (array)$ip);
 }
 
 /**

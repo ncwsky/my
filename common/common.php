@@ -385,7 +385,7 @@ function getSign(string $key, array $data = [], string $name = 'sign'): string
     ksort($data); //键名升序
     $string = '';
     foreach ($data as $k => $v) {
-        if (!$string) {
+        if ($string) {
             $string .= '&';
         }
         $string .= $k . '=' . $v;

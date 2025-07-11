@@ -12,6 +12,7 @@ trait TraitControl
 {
     /**
      * 临时文件上传 成功处理后移动 /index/tmp-upload
+     * 直接上传到正式目录 /index/tmp-upload?tmp=no
      * 使用原始内容上传 /index/tmp-upload?raw=1&file_name=test.jpg  post  raw
      * 使用原始base64内容上传 /index/tmp-upload?raw=base64&file_name=test.jpg  post  base64(raw)
      * @return array
@@ -21,21 +22,22 @@ trait TraitControl
         $upload = \Upload::getInstance();
         $upload->fileSize = 5;
         $upload->uploadPath = ROOT_DIR . '/tmp/'; //设置文件相对的上传路径
-        if (Q('tmp') == 'no') {
+        $tmp = $_POST['tmp'] ?? ($_GET['tmp'] ?? 'no');
+        if ($tmp == 'no') {
             $upload->uploadPath = ROOT_DIR . '/up/y' . date('Y/md/');
         }
         $upload->fileType = $upload->fileType . ',ico';
         $upload->realPath = SITE_WEB . $upload->uploadPath; //设置文件的绝对路径
         $upload->imgOptimize = true;
         $isEditor = isset($_GET['editor']) ? (bool)$_GET['editor'] : null;
-        $name = Q('name', 'files');
+        $name = $_POST['name'] ?? ($_GET['name'] ?? 'files');
         if ($isEditor) $name = 'upfile';
 
-        $raw = Q('get.raw');
+        $raw = $_GET['raw'] ?? '';
         if ($raw) {
             $_FILES[$name] = [
                 "tmp_name" => \myphp::rawBody(),
-                "name" => Q('get.file_name'),
+                "name" => isset($_GET['file_name']) ? trim($_GET['file_name']) : '',
                 "size" => 0,
                 "error" => UPLOAD_ERR_OK,
                 "type" => "raw_string",

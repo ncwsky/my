@@ -6,23 +6,22 @@ declare(strict_types=1);
  * @param string $name
  * @return lib_redis
  */
-function redis(string $name = 'redis')
+function redis(string $name = 'redis'): lib_redis
 {
     return myphp::redis($name);
 }
 
 /**
  * @return \myphp\cache\File
- * @throws Exception
  */
-function getCache()
+function getCache(): \myphp\cache\File
 {
     //return \myphp\Cache::getInstance('file', GetC('cache_option'));
     static $cache;
     if (!$cache) {
         $cache = new \myphp\cache\File();
-        $cache->setCacheDir(RUNTIME . '/cache');
-        $cache->setCachePrefix('_');
+        //$cache->setCacheDir(RUNTIME . '/cache');
+        //$cache->setCachePrefix('_');
     }
     return $cache;
 }
@@ -39,13 +38,6 @@ function cLog(string $name = 'clog')
 
 /**
  * 重试失败IP限制
- * @param string $name 标识
- * @param bool|null $record 是否记录错误次数
- * @param string|null $errMsg 错误内容
- * @param int $allowTimes
- * @param int $limitMinute
- * @return bool
- *
 //检测错误次数
 if (!retryErrLimitIp('标识', false, $errMsg)) {
     return self::fail($errMsg);
@@ -54,6 +46,13 @@ if (!retryErrLimitIp('标识', false, $errMsg)) {
 retryErrLimitIp('标识', true, $errMsg);
 //清除错误次数
 retryErrLimitIp('标识', null);
+ *
+ * @param string $name 标识
+ * @param bool|null $record 是否记录错误次数
+ * @param string|null $errMsg 错误内容
+ * @param int $allowTimes
+ * @param int $limitMinute
+ * @return bool
  */
 function retryErrLimitIp(string $name, ?bool $record = true, ?string &$errMsg = '', int $allowTimes = 6, int $limitMinute = 10): bool
 {
@@ -61,19 +60,21 @@ function retryErrLimitIp(string $name, ?bool $record = true, ?string &$errMsg = 
     $ip = \myphp\Helper::getIp();
     #$allowTimes = 6;
     #$limitMinute = 10;
+    //兼容处理 未配置redis时使用文件缓存处理
+    $cache = GetC('redis') ? redis() : getCache();
     $retryLimitKey = '_retry.' . $name . '.Limit:' . $ip;
     if ($record === null) {
-        redis()->del($retryLimitKey); //清除
+        $cache->del($retryLimitKey); //清除
         return true;
     }
-    $errTimes = (int)redis()->get($retryLimitKey);
+    $errTimes = (int)$cache->get($retryLimitKey);
     if ($record) {
-        redis()->incr($retryLimitKey);
-        redis()->expire($retryLimitKey, $limitMinute * 60);
+        $cache->incr($retryLimitKey);
+        $cache->expire($retryLimitKey, $limitMinute * 60);
         $errMsg = "还可以重试" . ($allowTimes - $errTimes - 1) . "次";
     } else {
         if ($errTimes >= $allowTimes) {
-            $limitMinute = ceil(intval(redis()->ttl($retryLimitKey)) / 60);
+            $limitMinute = ceil(intval($cache->ttl($retryLimitKey)) / 60);
             $errMsg = "错误次数超过" . $allowTimes . "次，请" . $limitMinute . "分钟后重试！";
             return false;
         }
@@ -297,9 +298,10 @@ function ipReqLimit($name, $num = 5, $sec = 10)
     } else {
         $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
     }
-    if (!redisLockOnce($name . ':' . $ip, $sec)) {
-        $num = redis()->get($name . ':' . $ip);
-        if ($num > 5) {
+    $redis = GetC('redis') ? redis() : getCache(); //兼容处理 未配置redis时使用文件锁定处理
+    if (!$redis->lockOnce($name . ':' . $ip, $sec)) {
+        $n = $redis->get($name . ':' . $ip);
+        if ($n > $num) {
             return false;
         }
     }
@@ -308,42 +310,18 @@ function ipReqLimit($name, $num = 5, $sec = 10)
 //加锁 解锁 主要用于保证并发时操作的原子性 会阻塞
 function redisLock(string $lockKey, int $lockTimeout = 10)
 {
-    return redis()->lockBlock($lockKey, $lockTimeout);
+    $redis = GetC('redis') ? redis() : getCache(); //兼容处理 未配置redis时使用文件锁定处理
+    return $redis->lockBlock($lockKey, $lockTimeout);
 }
 //加锁 解锁 主要用于判断是否重复操作
 function redisLockOnce(string $lockKey, int $lockTimeout = 10, lib_redis $redis = null): bool
 {
-    if (!GetC('redis')) { //兼容处理 未配置redis时使用文件锁定处理
-        return \myphp\Helper::fileLockOnce($lockKey, $lockTimeout);
-    }
     if (!$redis) {
-        $redis = redis();
+        $redis = GetC('redis') ? redis() : getCache(); //兼容处理 未配置redis时使用文件锁定处理
     }
     return $redis->lockOnce($lockKey, $lockTimeout);
 }
-//加锁带回调处理逻辑 会阻塞
-function redisLockCall(string $lockKey, $lockVal, \Closure $callback = null, int $lockTimeout = 10)
-{
-    $ret = null;
-    do {  //针对问题1，使用循环
-        $isLock = redis()->set($lockKey, $lockVal, 'nx', 'ex', $lockTimeout);//ex 秒  nx 只在键不存在时，才对键进行设置操作
-        if ($isLock) {
-            if (redis()->get($lockKey) == $lockVal) {  //防止提前过期，误删其它请求创建的锁
-                //执行内部代码
-                if ($callback instanceof \Closure) {
-                    $ret = call_user_func($callback);
-                }
-                #sleep(5);
-                redis()->del($lockKey);
-                continue;//执行成功删除key并跳出循环
-            }
-        } else {
-            #echo 'waiting...'.microtime(),PHP_EOL;
-            usleep(100000); //睡眠，降低抢锁频率，缓解redis压力，针对问题2
-        }
-    } while (!$isLock);
-    return $ret;
-}
+
 /**
  * 消息id 用于重复处理限制
  * @param string $key
@@ -354,9 +332,10 @@ function msgId(string $key = ''): int
     if ($key == '') {
         $key = '_kh_msg_id';
     }
-    $message_id = redis()->incr($key);
-    if ($message_id >= 0xFFFFFFFF) { #0xffffff
-        redis()->set($key, 0);
+    $redis = GetC('redis') ? redis() : getCache();
+    $message_id = $redis->incr($key);
+    if ($message_id >= 0xFFFFA000) { #0xFFFFFFFF 留点余量缓冲
+        $redis->set($key, 0);
     }
     return $message_id;
 }

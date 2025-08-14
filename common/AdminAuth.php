@@ -57,7 +57,7 @@ class AdminAuth extends \myphp\BaseAuth
     {
         $roleId = $roleId ?: (int)session('adminRole');
         if (!isset($this->roleRow[$roleId])) {
-            $this->roleRow[$roleId] = Role::fields('rank,name,purview')->where(['id' => $roleId])->one();
+            $this->roleRow[$roleId] = Role::fields('rank_val,name,purview')->where(['id' => $roleId])->one();
             if ($this->roleRow[$roleId]) {
                 $purview = strtr($this->roleRow[$roleId]['purview'], ';', ',');
                 //组合配置的权限设置 角色.角色编号
@@ -67,7 +67,7 @@ class AdminAuth extends \myphp\BaseAuth
                 $this->roleRow[$roleId]['purview'] = $purview;
             } else {
                 $this->roleRow[$roleId] = [
-                    'rank' => 0,
+                    'rank_val' => 0,
                     'name' => '-',
                     'purview' => ''
                 ];

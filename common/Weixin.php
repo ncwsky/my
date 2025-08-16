@@ -62,7 +62,7 @@ class Weixin
             return $app->template_message->send($data);
         } catch (\Exception $e) {
             static::clog('file:' . $e->getFile() . 'line:' . $e->getLine() . ',code:' . $e->getCode() . ',msg:' . $e->getMessage());
-            return false;
+            return null;
         }
     }
 

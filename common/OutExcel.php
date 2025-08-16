@@ -325,16 +325,18 @@ class OutExcel
     #是否有导出或生成下载列表
     public static function hasExportList($uid, string $cmd): bool
     {
-        return (bool)redis()->keys($cmd . ':' . $uid . ':*');
+        $redis = GetC('redis') ? redis() : getCache();
+        return (bool)$redis->keys($cmd . ':' . $uid . ':*');
     }
     #获取指定导出的生成列表
     public static function toExportList($uid, string $cmd): array
     {
-        $keys = redis()->keys($cmd.':'.$uid.':*');
+        $redis = GetC('redis') ? redis() : getCache();
+        $keys = $redis->keys($cmd.':'.$uid.':*');
         $list = [];
         foreach ($keys as $v) {
-            $val = redis()->get($v);
-            $val['expire'] = time() + redis()->ttl($v);
+            $val = $redis->get($v);
+            $val['expire'] = time() + $redis->ttl($v);
             $list[] = $val;
         }
         return $list;
@@ -349,15 +351,16 @@ class OutExcel
      */
     public static function toExportStatusOk($uid, string $cmd, array $params): bool
     {
+        $redis = GetC('redis') ? redis() : getCache();
         $name = md5(toJson($params));
         $key = $cmd . ':' . $uid . ':' . $name;
-        $data = redis()->get($key);
+        $data = $redis->get($key);
         if (!$data) {
             return false;
         }
         $data['mtime'] = time(); //完成时间
         $data['status'] = 1;
-        redis()->set($key, $data, self::EXPIRE);
+        $redis->set($key, $data, self::EXPIRE);
         return true;
     }
 
@@ -398,8 +401,9 @@ class OutExcel
         $name = md5(toJson($params));
         $suffix = $csv ? '.csv' : '.xlsx';
 
+        $redis = GetC('redis') ? redis() : getCache();
         $key = $cmd . ':' . $uid . ':' . $name;
-        if (redis()->exists($key) || !redisLockOnce('_' . $uid . '.' . $name)) {
+        if ($redis->exists($key) || !redisLockOnce('_' . $uid . '.' . $name)) {
             self::err('已发送生成指令，1小时内请不要重复操作！');
             return false;
         }
@@ -408,7 +412,7 @@ class OutExcel
             $fileName = $prefixName.$name;
             $url = U('/up/export/' . $fileName . $suffix . '?t=' . $time);
             $data = ['name' => $fileName, 'ctime' => $time, 'mtime' => 0, 'status' => 0, 'url' => $url]; //0表示生成中
-            redis()->set($key, $data, self::EXPIRE);
+            $redis->set($key, $data, self::EXPIRE);
 
             $params['_uid'] = $uid; //标识操作人
             //脚本入列

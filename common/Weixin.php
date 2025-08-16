@@ -2,7 +2,10 @@
 namespace common;
 
 use EasyWeChat\Factory;
+use EasyWeChat\Kernel\Support\Collection;
+use GuzzleHttp\Exception\GuzzleException;
 use myphp\Helper;
+use Psr\Http\Message\ResponseInterface;
 
 class Weixin
 {
@@ -45,7 +48,8 @@ class Weixin
      * @param array $sendData
      * @param string $url
      * @param string $cfg
-     * @return array|bool|\EasyWeChat\Kernel\Support\Collection|object|\Psr\Http\Message\ResponseInterface|string
+     * @return array|Collection|object|ResponseInterface|string|null
+     * @throws GuzzleException
      */
     public static function pushCommon(string $openid, string $template_id, array $sendData, string $url = '', string $cfg = self::WX_CFG)
     {
@@ -59,7 +63,67 @@ class Weixin
             if ($url) {
                 $data['url'] = $url;
             }
-            return $app->template_message->send($data);
+            return $app->template_message->send($data); //response_type 受控制
+        } catch (\Exception $e) {
+            static::clog('file:' . $e->getFile() . 'line:' . $e->getLine() . ',code:' . $e->getCode() . ',msg:' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 公众号发送一次性订阅消息
+     * @param string $openid
+     * @param string $template_id
+     * @param array $sendData
+     * @param int $scene
+     * @param string $url
+     * @param string $cfg
+     * @return array|Collection|object|ResponseInterface|string|null
+     * @throws GuzzleException
+     */
+    public static function mpSubscribe(string $openid, string $template_id, array $sendData, int $scene = 0, string $url = '', string $cfg = self::WX_CFG)
+    {
+        try {
+            $app = static::getApp($cfg);
+            $data = [
+                'touser' => $openid,
+                'template_id' => $template_id,
+                'scene' => $scene,
+                'data' => $sendData,
+            ];
+            if ($url) {
+                $data['url'] = $url;
+            }
+            return $app->template_message->sendSubscription($data); //response_type 受控制
+        } catch (\Exception $e) {
+            static::clog('file:' . $e->getFile() . 'line:' . $e->getLine() . ',code:' . $e->getCode() . ',msg:' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 小程序发送订阅消息
+     * @param string $openid
+     * @param string $template_id
+     * @param array $sendData
+     * @param string $page
+     * @param string $cfg
+     * @return array|Collection|object|ResponseInterface|string|null
+     * @throws GuzzleException
+     */
+    public static function miniSubscribe(string $openid, string $template_id, array $sendData, string $page = '', string $cfg = self::WX_CFG)
+    {
+        try {
+            $app = static::getApp($cfg);
+            $data = [
+                'touser' => $openid,
+                'template_id' => $template_id,
+                'data' => $sendData,
+            ];
+            if ($page) {
+                $data['page'] = $page;
+            }
+            return $app->subscribe_message->send($data); //response_type 受控制
         } catch (\Exception $e) {
             static::clog('file:' . $e->getFile() . 'line:' . $e->getLine() . ',code:' . $e->getCode() . ',msg:' . $e->getMessage());
             return null;

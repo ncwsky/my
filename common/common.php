@@ -82,6 +82,33 @@ function retryErrLimitIp(string $name, ?bool $record = true, ?string &$errMsg = 
     return true;
 }
 /**
+ * 操作次数限制函数: 限制 指定key 在 period 秒内能最多操作 max_count 次.
+    if(acLimit($ip.'login', 5, 30)){
+    // 正常操作
+    }else{
+    // 超过频率限制
+    }
+ * @param string $key
+ * @param int $max_count
+ * @param int $period
+ * @return bool 如果超过限制, 返回 false.
+ */
+function acLimit(string $key, int $max_count, int $period = 60): bool
+{
+    $cache = GetC('redis') ? redis() : getCache();
+    $now = time();
+    $expire = intval($now / $period) * $period + $period;
+    $ttl = $expire - $now;
+    $key = '_acLimit:' . $key;
+    $count = $cache->incr($key);
+    $cache->expire($key, $ttl);
+    if (!$count || $count > $max_count) {
+        return false;
+    }
+    return true;
+}
+
+/**
  * url组装
  * @param string $name
  * @param string $url

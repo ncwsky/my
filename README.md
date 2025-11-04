@@ -15,6 +15,16 @@ php app.php
 php app.php -n进程数 -p端口 [-s Swoole方式运行] 
 ```
 
+**打包生成phpar**
+```
+ 在项目开发完成后可执行命令生成phar文件
+ php cli.php phar
+ 如果提示 disabled by the php.ini setting phar.readonly 使用下面命令
+ php -d phar.readonly=0 cli.php phar   使用 -d 参数来临时修改 phar.readonly 设置
+ 
+ 在常驻内存运行执行 php my.phar
+```
+
 **composer**  
 ```
 二维码

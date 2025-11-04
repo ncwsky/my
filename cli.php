@@ -97,7 +97,7 @@ function cliModel(string $table = '1', string $namespace = 'common\model', strin
 }
 
 /**
- * 生成phar文件 仅用于常驻内存模式下运行
+ * 生成phar文件 my.phar 仅用于常驻内存模式下运行: php my.phar
  * php cli.php phar
  * php -d phar.readonly=0 cli.php phar   使用 -d 参数来临时修改 phar.readonly 设置
  * @param string $sigName

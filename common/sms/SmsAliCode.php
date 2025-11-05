@@ -8,7 +8,7 @@ class SmsAliCode
 {
     use \MyMsg;
 
-    const REQUEST_URL = "https://dysmsapi.aliyuncs.com/";
+    public const REQUEST_URL = "https://dysmsapi.aliyuncs.com/";
 
     private $accessKeyId = "your access key id";
     private $accessKeySecret = "your access key secret";
@@ -29,7 +29,7 @@ class SmsAliCode
      */
     public function send(string $mobile, string $code, string $sign, string $msgId = '')
     {
-        $params = array();
+        $params = [];
         // fixme 必填: 短信接收号码
         $params['PhoneNumbers'] = $mobile;
 
@@ -79,14 +79,14 @@ class SmsAliCode
      */
     public function request(array $params)
     {
-        $apiParams = array_merge(array(
+        $apiParams = array_merge([
             "SignatureMethod" => "HMAC-SHA1",
             "SignatureNonce" => uniqid((string)mt_rand(0, 0xffff), true),
             "SignatureVersion" => "1.0",
             "AccessKeyId" => $this->accessKeyId,
             "Timestamp" => gmdate("Y-m-d\TH:i:s\Z"),
             "Format" => "JSON",
-        ), $params);
+        ], $params);
         ksort($apiParams);
 
         $sortedQueryStringTmp = "";

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace common;
 
-
 use myphp\Control;
 use myphp\Value;
 
@@ -31,7 +30,9 @@ trait TraitControl
         $upload->imgOptimize = true;
         $isEditor = isset($_GET['editor']) ? (bool)$_GET['editor'] : null;
         $name = $_POST['name'] ?? ($_GET['name'] ?? 'files');
-        if ($isEditor) $name = 'upfile';
+        if ($isEditor) {
+            $name = 'upfile';
+        }
 
         $raw = $_GET['raw'] ?? '';
         if ($raw) {

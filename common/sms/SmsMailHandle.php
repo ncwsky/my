@@ -8,7 +8,7 @@ class SmsMailHandle implements SmsMailSendInterface
 {
     use \MyMsg;
 
-    const WAYS_ALI_CODE = 'aliCode';
+    public const WAYS_ALI_CODE = 'aliCode';
 
     public $ways = self::WAYS_ALI_CODE;
 

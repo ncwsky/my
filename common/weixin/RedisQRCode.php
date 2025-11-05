@@ -13,7 +13,7 @@ class RedisQRCode implements QRCodeInterface
     private $redis;
     private $prefix = '';
 
-    public function __construct($wx=Weixin::WX_CFG, $name='redis', $prefix='__qr')
+    public function __construct($wx = Weixin::WX_CFG, $name = 'redis', $prefix = '__qr')
     {
         $this->wx = $wx;
         $this->redis = redis($name);
@@ -24,7 +24,8 @@ class RedisQRCode implements QRCodeInterface
      * 场景自增id
      * @return int
      */
-    public function incrId(){
+    public function incrId()
+    {
         $key = '_qr_scene_id';
         $id = $this->redis->incr($key);
         if ($id >= 0xFFFFFFFF) { #0xffffff
@@ -32,7 +33,7 @@ class RedisQRCode implements QRCodeInterface
         }
         return $id;
     }
-    public function create(int $type, array $data=[], $timeout=610):?array
+    public function create(int $type, array $data = [], $timeout = 610): ?array
     {
         $sceneId = $this->incrId();
         $ret = Weixin::qr($sceneId, $timeout, $this->wx);

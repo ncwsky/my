@@ -11,18 +11,18 @@ class Weixin
 {
     use \MyMsg;
     //openid for work
-    const OP_DEV = 'o8E801u7dC30OOOjGEwO7fE-EOmM';
+    public const OP_DEV = 'o8E801u7dC30OOOjGEwO7fE-EOmM';
 
     #后台非公司网络登陆时微信验证
     public static $admOuterNetWxAuth = [self::OP_DEV];
 
-    const WX_CFG = 'wxp';
+    public const WX_CFG = 'wxp';
 
     /**
      * @var \EasyWeChat\OfficialAccount\Application[]
      */
     public static $app = [];
-    public static $wxAsync= true; //微信异步通知 默认异步
+    public static $wxAsync = true; //微信异步通知 默认异步
 
     /**
      * @param string $name
@@ -183,12 +183,14 @@ class Weixin
         #return $app->qrcode->forever($sceneVal); //[ticket,url]
     }
 
-    const AES_KEY = 'fEhrTmbbQI';
+    public const AES_KEY = 'fEhrTmbbQI';
 
     //用于请求识别有效性
     public static function enAesJson($data, $expiry = 0)
     {
-        if (!is_scalar($data)) $data = toJson($data);
+        if (!is_scalar($data)) {
+            $data = toJson($data);
+        }
         return base64_encode(\AES::encode(sprintf('%010d', $expiry ? $expiry + time() : 0) . $data, self::AES_KEY));
     }
 

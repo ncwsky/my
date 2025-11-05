@@ -183,7 +183,7 @@ function orderSN(int $prefix = 0, string $s = '1'): string
  * @return int
  * @throws Exception
  */
-function getAge(string $birth, DateTime $now = null): int
+function getAge(string $birth, ?DateTime $now = null): int
 {
     if ($now === null) {
         $now = new \DateTime();
@@ -341,7 +341,7 @@ function redisLock(string $lockKey, int $lockTimeout = 10)
     return $redis->lockBlock($lockKey, $lockTimeout);
 }
 //加锁 解锁 主要用于判断是否重复操作
-function redisLockOnce(string $lockKey, int $lockTimeout = 10, lib_redis $redis = null): bool
+function redisLockOnce(string $lockKey, int $lockTimeout = 10, ?lib_redis $redis = null): bool
 {
     if (!$redis) {
         $redis = GetC('redis') ? redis() : getCache(); //兼容处理 未配置redis时使用文件锁定处理
@@ -437,7 +437,9 @@ function tmp2file(int $uid, string $pic, string $dir = '', bool &$isTmp = false)
 function tmpToFile(string &$pic, string $new_dir, bool &$isTmp = false)
 {
     $isTmp = false;
-    if (strpos($pic, '/tmp/') === false) return;
+    if (strpos($pic, '/tmp/') === false) {
+        return;
+    }
     //临时文件 移动
     $root = __DIR__ . '/../web';
     if (!file_exists($root . $pic)) { //文件不存在

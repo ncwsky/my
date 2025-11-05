@@ -22,7 +22,7 @@ class OutExcel
      * @param \Closure|null $eachFun
      * @param bool $isOver 是否写入结束 默认是
      */
-    public static function putCsv(string $title, array $data, array $headers, \Closure $eachFun = null, bool $isOver = true)
+    public static function putCsv(string $title, array $data, array $headers, ?\Closure $eachFun = null, bool $isOver = true)
     {
         static $fp;
         $io_out = self::$pFilename == 'php://output';
@@ -84,7 +84,7 @@ class OutExcel
      * @throws \Box\Spout\Common\Exception\IOException
      * @throws \Box\Spout\Writer\Exception\WriterNotOpenedException
      */
-    public static function putSpout(string $title, array $data, array $headers, \Closure $eachFun = null, bool $isOver = true)
+    public static function putSpout(string $title, array $data, array $headers, ?\Closure $eachFun = null, bool $isOver = true)
     {
         static $writer;
         $io_out = self::$pFilename == 'php://output';
@@ -171,7 +171,7 @@ class OutExcel
      * @throws \PHPExcel_Reader_Exception
      * @throws \PHPExcel_Writer_Exception
      */
-    public static function put(string $title, array $data, array $headers, \Closure $eachFun = null, \Closure $headFun = null, int $rowIndex = 2)
+    public static function put(string $title, array $data, array $headers, ?\Closure $eachFun = null, ?\Closure $headFun = null, int $rowIndex = 2)
     {
         if (self::$csv) {
             self::$csv = false;
@@ -371,7 +371,7 @@ class OutExcel
      * @param string $prefixName
      * @return string
      */
-    public static function realExportFile($uid, array $params, bool $csv = null, string $prefixName = ''): string
+    public static function realExportFile($uid, array $params, ?bool $csv = null, string $prefixName = ''): string
     {
         $name = md5(toJson($params));
         $dir = SITE_WEB . '/up/export';
@@ -393,7 +393,7 @@ class OutExcel
      * @param string $prefixName
      * @return bool
      */
-    public static function toExport($uid, string $cmd, array $params, bool $csv = null, string $prefixName = ''): bool
+    public static function toExport($uid, string $cmd, array $params, ?bool $csv = null, string $prefixName = ''): bool
     {
         if ($csv === null) {
             $csv = self::$csv;

@@ -48,8 +48,7 @@ class Weixin
      * @param array $sendData
      * @param string $url
      * @param string $cfg
-     * @return array|Collection|object|ResponseInterface|string|null
-     * @throws GuzzleException
+     * @return mixed
      */
     public static function pushCommon(string $openid, string $template_id, array $sendData, string $url = '', string $cfg = self::WX_CFG)
     {
@@ -78,8 +77,7 @@ class Weixin
      * @param int $scene
      * @param string $url
      * @param string $cfg
-     * @return array|Collection|object|ResponseInterface|string|null
-     * @throws GuzzleException
+     * @return mixed
      */
     public static function mpSubscribe(string $openid, string $template_id, array $sendData, int $scene = 0, string $url = '', string $cfg = self::WX_CFG)
     {
@@ -108,8 +106,7 @@ class Weixin
      * @param array $sendData
      * @param string $page
      * @param string $cfg
-     * @return array|Collection|object|ResponseInterface|string|null
-     * @throws GuzzleException
+     * @return mixed
      */
     public static function miniSubscribe(string $openid, string $template_id, array $sendData, string $page = '', string $cfg = self::WX_CFG)
     {

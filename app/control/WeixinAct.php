@@ -47,7 +47,6 @@ class WeixinAct extends \myphp\Control
             switch ($message['MsgType']) {
                 case 'event':
                     return $this->eventHandler($message);
-                    break;
                 case 'text':
                     //return '收到文字消息';
                     //break;
@@ -154,7 +153,7 @@ class WeixinAct extends \myphp\Control
     /**
      * @param int $sceneId
      * @param array $message
-     * @param RedisQRCode|QrCodeInterface $qrClass
+     * @param \common\weixin\QRCodeInterface|RedisQRCode $qrClass
      * @return string
      */
     private function sceneIdHandler($sceneId, $message, $qrClass)
@@ -162,7 +161,6 @@ class WeixinAct extends \myphp\Control
         if (empty($sceneId)) {
             return "搜索关注". toJson($message);
         }
-        $openid = $message['FromUserName'];
         $failMsg = '【'.$sceneId.'】二维码已失效，请重新刷新扫码';
         //todo 通过$sceneId获取二维码数据
         //二维码处理事件数据
@@ -175,7 +173,7 @@ class WeixinAct extends \myphp\Control
             $qrCodeLogRet['type'] = 0;
         }
 
-        $isTmForeverQr = substr($sceneId, 0, 2) == 'fe';
+        $isTmForeverQr = substr((string)$sceneId, 0, 2) == 'fe';
         if ($isTmForeverQr) { #永久二维码  模拟数据
             //todo
         }
@@ -186,7 +184,7 @@ class WeixinAct extends \myphp\Control
             }
         }
 
-        $openid = $message["FromUserName"];
+        $openid = $message['FromUserName'];
         $okMsg = '扫码成功';
         switch ($qrCodeLogRet['type']) {
             case 100:

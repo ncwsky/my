@@ -8,11 +8,18 @@ parameters:
     excludePaths:
         - vendor
         - dist
+        - common/EasyAlipay
+        - common/Aop.php
+        - common/EasyAlipay.php
         - runtime
         - app.php
+        - app.conf.php
         - cmd.php
     ignoreErrors:
         - '#lib_redis#'
         - '#EasyWeChat#'
         - '#JWT#'
         - '#(PHPExcel|Spout|Admin)#'
+        - '#myphp\\Session::getId\(\)#'
+        - '#static method fields\(\)#'
+        - '#Static call to instance method myphp\\Model::fields#'

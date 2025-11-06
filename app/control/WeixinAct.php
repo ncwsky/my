@@ -1,4 +1,5 @@
 <?php
+
 namespace app\control;
 
 use common\Weixin;

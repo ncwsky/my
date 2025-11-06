@@ -1,4 +1,5 @@
 <?php
+
 namespace common\weixin;
 
 interface QRCodeInterface

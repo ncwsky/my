@@ -16,7 +16,7 @@ use PhpCsFixer\Finder;
 
 $finder = Finder::create()->in(__DIR__)
     ->exclude(['vendor','tpl']) // 排除 vendor 目录
-    ->notPath(['app/config.php','conf.php','web/index.php','web/yx_git.php'])
+    ->notPath(['app.php','cmd.php','app/config.php','conf.php','web/index.php','web/yx_git.php'])
     ->name('*.php');
     //->exclude('def_config.php')
     //->notName(['*config.php']);
@@ -47,7 +47,7 @@ return $config->setRules([
     //'phpdoc_to_param_type'=>true,
     //'phpdoc_to_property_type'=>true,
     //'phpdoc_to_return_type' => true, //启用phpdoc到返回类型声明的转换（如果你有这样的需求）
-    'declare_strict_types'  => true, //确保所有文件都包含 declare(strict_types=1); 声明
+   // 'declare_strict_types'  => true, //确保所有文件都包含 declare(strict_types=1); 声明
     //'strict_param' => true, // 强制函数的参数必须是严格模式
 
     //'void_return' => true, // 使用有效的返回类型声明
